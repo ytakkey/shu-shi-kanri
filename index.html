@@ -6,26 +6,28 @@
   <title>収支管理簿</title>
   <style>
     :root {
-      --bg-main: #eef8f4;
-      --bg-fixed: #eef6ff;
-      --panel: rgba(255, 255, 255, .86);
-      --panel-strong: rgba(255, 255, 255, .94);
-      --line: rgba(100, 116, 139, .32);
+      --bg-main: #f1f3ff;
+      --bg-fixed: #f4f5f7;
+      --panel: rgba(255, 255, 255, .94);
+      --panel-strong: rgba(255, 255, 255, .98);
+      --line: rgba(71, 85, 105, .40);
       --text: #172033;
       --muted: #536074;
       --income: #0f766e;
       --expense: #b42318;
-      --accent: #2f855a;
-      --accent-dark: #276749;
-      --fixed-accent: #2563eb;
-      --fixed-accent-dark: #1d4ed8;
+      --accent: #4f46e5;
+      --accent-dark: #3730a3;
+      --fixed-accent: #64748b;
+      --fixed-accent-dark: #334155;
+      --focus-border: #475569;
+      --focus-ring: rgba(71, 85, 105, .18);
       --radius: 22px;
       --inner-width: min(720px, calc(100vw - 36px));
       --header-h: 164px;
       --footer-h: 132px;
       --header-top-gap: 22px;
       --content-gap: 12px;
-      --footer-bottom-gap: 18px;
+      --footer-bottom-gap: 12px;
       --floating-gap: 12px;
     }
 
@@ -39,16 +41,19 @@
       color: var(--text);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 12% 8%, rgba(47, 133, 90, .16), transparent 34%),
+        radial-gradient(circle at 12% 8%, rgba(79, 70, 229, .16), transparent 34%),
         linear-gradient(135deg, var(--bg-main), #f8fbff);
       padding-top: calc(var(--header-h) + var(--content-gap));
-      padding-bottom: calc(var(--footer-h) + 92px);
+      padding-bottom: 0;
+      height: 100dvh;
+      overflow: hidden;
+      overflow-x: hidden;
       transition: background .28s ease;
     }
 
     body.fixed-screen {
       background:
-        radial-gradient(circle at 14% 8%, rgba(37, 99, 235, .16), transparent 34%),
+        radial-gradient(circle at 14% 8%, rgba(100, 116, 139, .18), transparent 34%),
         linear-gradient(135deg, var(--bg-fixed), #f8fbff);
     }
 
@@ -67,14 +72,14 @@
       inset: 0 0 auto;
       z-index: 20;
       border-bottom: 1px solid rgba(255, 255, 255, .45);
-      background: rgba(237, 248, 244, .74);
+      background: rgba(241, 243, 255, .82);
       backdrop-filter: blur(18px) saturate(1.35);
       -webkit-backdrop-filter: blur(18px) saturate(1.35);
       padding: calc(var(--header-top-gap) + env(safe-area-inset-top)) 0 16px;
     }
 
     body.fixed-screen .top-balance {
-      background: rgba(238, 246, 255, .74);
+      background: rgba(244, 245, 247, .82);
     }
 
     .top-inner,
@@ -112,7 +117,7 @@
       color: var(--muted);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .56);
       padding: 9px 13px;
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.1;
       font-weight: 800;
       cursor: pointer;
@@ -136,20 +141,20 @@
 
     .editable-balance {
       width: 100%;
-      min-height: 66px;
-      border: 1px solid rgba(47, 133, 90, .25);
-      border-radius: 22px;
+      min-height: 58px;
+      border: 1px solid rgba(79, 70, 229, .28);
+      border-radius: 20px;
       background: rgba(255, 255, 255, .62);
       color: var(--text);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .70);
-      padding: 12px 16px;
+      padding: 10px 15px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       text-align: left;
       cursor: pointer;
-      font-size: clamp(34px, 8.6vw, 48px);
+      font-size: clamp(30px, 7.6vw, 42px);
       line-height: 1;
       font-weight: 900;
       letter-spacing: -.04em;
@@ -160,8 +165,8 @@
       content: "タップして編集";
       flex: 0 0 auto;
       color: var(--accent-dark);
-      background: rgba(231, 246, 237, .74);
-      border: 1px solid rgba(47, 133, 90, .16);
+      background: rgba(238, 242, 255, .86);
+      border: 1px solid rgba(79, 70, 229, .22);
       border-radius: 999px;
       padding: 8px 12px;
       font-size: 13px;
@@ -172,11 +177,13 @@
 
     .main {
       overflow: hidden;
+      height: max(120px, calc(100dvh - var(--header-h) - var(--content-gap) - var(--footer-h) - 86px));
     }
 
     .screen-slider {
       display: flex;
       width: 200%;
+      height: 100%;
       transform: translateX(0);
       transition: transform .32s cubic-bezier(.22, .80, .28, 1);
       will-change: transform;
@@ -190,7 +197,20 @@
       flex: 0 0 50%;
       width: 50%;
       min-width: 0;
-      padding: 0;
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 0 0 2px;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screen.screen-hidden {
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .list,
@@ -206,7 +226,7 @@
     .modal,
     .bottom-summary,
     .fixed-bottom-summary {
-      border: 1px solid rgba(100, 116, 139, .22);
+      border: 1px solid rgba(71, 85, 105, .30);
       background: var(--panel);
       backdrop-filter: blur(18px) saturate(1.32);
       -webkit-backdrop-filter: blur(18px) saturate(1.32);
@@ -222,7 +242,7 @@
 
     .row,
     .fixed-cost-item {
-      border-bottom: 1px solid rgba(100, 116, 139, .20);
+      border-bottom: 1px solid rgba(71, 85, 105, .24);
       background: transparent;
     }
 
@@ -244,15 +264,16 @@
       display: grid;
       grid-template-columns: 40px minmax(0, 1fr) auto;
       gap: 3px;
-      align-items: center;
+      align-items: baseline;
       padding: 14px 4px 14px 14px;
     }
 
     .date {
       color: var(--muted);
       font-size: 15px;
-      font-weight: 400;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
+      line-height: 1.2;
       white-space: nowrap;
     }
 
@@ -260,7 +281,8 @@
       min-width: 0;
       color: var(--text);
       font-size: 15px;
-      font-weight: 400;
+      font-weight: 700;
+      line-height: 1.2;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -269,7 +291,8 @@
     .amount,
     .fixed-cost-amount {
       font-size: 15px;
-      font-weight: 400;
+      font-weight: 700;
+      line-height: 1.2;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
@@ -305,7 +328,7 @@
 
     .fixed-cost-list {
       display: grid;
-      gap: 14px;
+      gap: 10px;
     }
 
     .fixed-cost-group {
@@ -318,9 +341,9 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      padding: 16px 16px;
-      background: rgba(219, 234, 254, .82);
-      border-bottom: 1px solid rgba(37, 99, 235, .22);
+      padding: 12px 14px;
+      background: rgba(226, 232, 240, .96);
+      border-bottom: 1px solid rgba(100, 116, 139, .28);
     }
 
     .fixed-cost-head-title {
@@ -362,14 +385,14 @@
       grid-template-columns: minmax(0, 1fr) auto auto auto;
       gap: 8px;
       align-items: center;
-      padding: 14px 14px 14px 16px;
+      padding: 10px 12px 10px 14px;
     }
 
     .fixed-cost-name {
       min-width: 0;
       color: var(--text);
       font-size: 14px;
-      font-weight: 400;
+      font-weight: 700;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -429,13 +452,13 @@
     .floating-nav {
       flex: 0 1 auto;
       color: var(--accent-dark);
-      background: rgba(255, 255, 255, .78);
+      background: rgba(255, 255, 255, .90);
       border-color: rgba(39, 103, 73, .30);
     }
 
     body.fixed-screen .floating-nav {
       color: var(--fixed-accent-dark);
-      border-color: rgba(29, 78, 216, .30);
+      border-color: rgba(100, 116, 139, .32);
     }
 
     .floating-clear {
@@ -467,8 +490,8 @@
       z-index: 20;
       border-width: 1px 0 0;
       border-radius: 0;
-      background: rgba(255, 255, 255, .78);
-      padding: 14px 0 calc(var(--footer-bottom-gap) + env(safe-area-inset-bottom));
+      background: rgba(255, 255, 255, .90);
+      padding: 10px 0 calc(var(--footer-bottom-gap) + env(safe-area-inset-bottom));
     }
 
     body.fixed-screen .bottom-summary,
@@ -478,7 +501,7 @@
 
     .summary-grid {
       display: grid;
-      gap: 8px;
+      gap: 4px;
     }
 
     .summary-line {
@@ -487,26 +510,27 @@
       justify-content: space-between;
       gap: 12px;
       font-weight: 900;
+      line-height: 1.12;
     }
 
     .summary-line span:first-child {
       color: var(--muted);
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .summary-line span:last-child {
-      font-size: 22px;
+      font-size: 17px;
       font-variant-numeric: tabular-nums;
     }
 
     .summary-line.total {
       border-top: 1px solid rgba(148, 163, 184, .28);
-      margin-top: 4px;
-      padding-top: 10px;
+      margin-top: 3px;
+      padding-top: 7px;
     }
 
     .summary-line.total span:last-child {
-      font-size: clamp(28px, 7vw, 34px);
+      font-size: clamp(25px, 6.2vw, 30px);
       font-weight: 900;
       letter-spacing: -.04em;
     }
@@ -524,7 +548,7 @@
 
     .fixed-bottom-summary .summary-line.total span:last-child {
       color: var(--fixed-accent-dark);
-      font-size: clamp(28px, 7vw, 34px);
+      font-size: clamp(25px, 6.2vw, 30px);
       font-weight: 900;
       letter-spacing: -.04em;
     }
@@ -554,11 +578,11 @@
     }
 
     .modal-backdrop.tone-income .modal {
-      background: linear-gradient(135deg, rgba(231, 246, 237, .94), rgba(255, 255, 255, .92));
+      background: linear-gradient(135deg, rgba(220, 252, 231, .98), rgba(255, 255, 255, .94));
     }
 
     .modal-backdrop.tone-expense .modal {
-      background: linear-gradient(135deg, rgba(254, 242, 242, .94), rgba(255, 255, 255, .92));
+      background: linear-gradient(135deg, rgba(254, 226, 226, .98), rgba(255, 255, 255, .94));
     }
 
     .modal-head {
@@ -612,14 +636,8 @@
 
     .field input:focus,
     .field textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(47, 133, 90, .12);
-    }
-
-    body.fixed-screen .field input:focus,
-    body.fixed-screen .field textarea:focus {
-      border-color: var(--fixed-accent);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+      border-color: var(--focus-border);
+      box-shadow: 0 0 0 4px var(--focus-ring);
     }
 
     .type-toggle {
@@ -644,14 +662,14 @@
     }
 
     .type-option.selected-income {
-      background: rgba(15, 118, 110, .14);
-      border-color: rgba(15, 118, 110, .34);
+      background: rgba(15, 118, 110, .24);
+      border-color: rgba(15, 118, 110, .52);
       color: var(--income);
     }
 
     .type-option.selected-expense {
-      background: rgba(180, 35, 24, .12);
-      border-color: rgba(180, 35, 24, .30);
+      background: rgba(180, 35, 24, .22);
+      border-color: rgba(180, 35, 24, .48);
       color: var(--expense);
     }
 
@@ -686,14 +704,15 @@
     }
 
     .fixed-quick-area {
-      border: 1px solid rgba(148, 163, 184, .22);
+      border: 1px solid rgba(180, 35, 24, .18);
       border-radius: 18px;
-      background: rgba(255, 255, 255, .48);
+      background: rgba(255, 255, 255, .54);
       padding: 10px;
     }
 
     .hint,
     .backup-lead,
+    .confirm-lead,
     .confirm-message,
     .restore-field-hint,
     .tiny-status {
@@ -704,10 +723,29 @@
       margin: 0;
     }
 
+    .tiny-status.status-success {
+      color: #334155;
+      font-weight: 900;
+    }
+
     .section-title {
       margin-top: 14px;
       padding-top: 12px;
       border-top: 1px solid rgba(148, 163, 184, .22);
+      color: var(--text);
+      font-size: 15px;
+      letter-spacing: .01em;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      border-radius: 999px;
+      background: #64748b;
+      margin-right: 7px;
+      vertical-align: -2px;
     }
 
     .category-chip-area {
@@ -725,11 +763,18 @@
     .category-chip {
       border-radius: 999px;
       color: var(--fixed-accent-dark);
-      background: rgba(219, 234, 254, .66);
+      background: rgba(248, 250, 252, .96);
+      border-color: rgba(100, 116, 139, .34);
       padding: 7px 11px;
       font-size: 12px;
       line-height: 1;
       font-weight: 900;
+    }
+
+    .confirm-lead {
+      color: var(--text);
+      font-weight: 900;
+      margin-bottom: 10px;
     }
 
     .confirm-box {
@@ -758,10 +803,108 @@
       cursor: pointer;
     }
 
-    .primary-button { background: var(--accent); border-color: rgba(47, 133, 90, .38); color: #fff; }
-    body.fixed-screen .primary-button { background: var(--fixed-accent); border-color: rgba(37, 99, 235, .38); }
+    .primary-button { background: #334155; border-color: rgba(15, 23, 42, .42); color: #fff; }
+    body.fixed-screen .primary-button { background: #334155; border-color: rgba(15, 23, 42, .42); }
     .secondary-button { background: rgba(248, 250, 252, .94); color: var(--text); }
     .danger-button { background: rgba(254, 226, 226, .96); border-color: rgba(180, 35, 24, .24); color: var(--expense); }
+
+
+    .quote-button {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid rgba(180, 35, 24, .30);
+      border-radius: 16px;
+      background: var(--expense);
+      color: #fff;
+      padding: 11px 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .fixed-quote-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fixed-quote-group {
+      border: 1px solid rgba(100, 116, 139, .24);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .58);
+      overflow: hidden;
+    }
+
+    .fixed-quote-group-head,
+    .fixed-quote-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .fixed-quote-group-head {
+      padding: 12px;
+      background: rgba(254, 226, 226, .58);
+      border-bottom: 1px solid rgba(180, 35, 24, .16);
+    }
+
+    .fixed-quote-title,
+    .fixed-quote-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fixed-quote-title strong {
+      display: block;
+      color: var(--expense);
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .fixed-quote-title span,
+    .fixed-quote-amount {
+      color: var(--muted);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .fixed-quote-item {
+      padding: 11px 12px;
+      border-top: 1px solid rgba(100, 116, 139, .14);
+    }
+
+    .fixed-quote-item:first-of-type {
+      border-top: 0;
+    }
+
+    .fixed-quote-name {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .fixed-quote-name small {
+      display: inline-block;
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quote-category-button,
+    .quote-detail-button {
+      border: 1px solid rgba(180, 35, 24, .22);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .92);
+      color: var(--expense);
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
 
     .backup-output {
       display: none;
@@ -773,6 +916,12 @@
 
     .backup-output textarea {
       min-height: 78px;
+    }
+
+    #backupText,
+    #importText {
+      font-size: 10px;
+      line-height: 1.35;
     }
 
     .toast {
@@ -789,6 +938,7 @@
       font-size: 13px;
       line-height: 1.35;
       font-weight: 800;
+      white-space: pre-line;
       opacity: 0;
       pointer-events: none;
       transition: opacity .18s ease, transform .18s ease;
@@ -811,12 +961,12 @@
 
       .data-button {
         padding: 8px 11px;
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .editable-balance {
-        min-height: 62px;
-        padding: 10px 14px;
+        min-height: 56px;
+        padding: 9px 13px;
       }
 
       .editable-balance::after {
@@ -862,16 +1012,16 @@
 
       .fixed-cost-item {
         grid-template-columns: minmax(0, 1fr) auto auto auto;
-        padding: 13px 10px 13px 12px;
+        padding: 10px 10px 10px 12px;
       }
 
       .summary-line span:last-child {
-        font-size: 21px;
+        font-size: 16px;
       }
 
       .summary-line.total span:last-child,
       .fixed-bottom-summary .summary-line.total span:last-child {
-        font-size: 31px;
+        font-size: 27px;
       }
 
       .floating-actions {
@@ -901,7 +1051,7 @@
 
       .data-button {
         padding: 7px 9px;
-        font-size: 11.5px;
+        font-size: 12.5px;
       }
 
       .floating-actions {
@@ -937,7 +1087,7 @@
       <section id="mainScreen" class="screen" aria-label="収支管理簿">
         <div id="transactionList" class="list"></div>
       </section>
-      <section id="fixedCostScreen" class="screen" aria-label="固定費管理簿">
+      <section id="fixedCostScreen" class="screen screen-hidden" aria-label="固定費管理簿">
         <div id="fixedCostContent"></div>
       </section>
     </div>
@@ -991,6 +1141,12 @@
     const STORAGE_KEY = "simple-household-book-main-v1";
     const EXPORT_PREFIX_COMPRESSED = "S2.";
     const EXPORT_PREFIX_PLAIN = "S2P.";
+    const YEN_FORMATTER = new Intl.NumberFormat("ja-JP", {
+      style: "currency",
+      currency: "JPY",
+      maximumFractionDigits: 0
+    });
+    const INTEGER_FORMATTER = new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 });
 
     const defaultFixedCosts = [
       { id: newId(), category: "クレジット", name: "スマホ代", amount: 7764 },
@@ -1013,10 +1169,14 @@
     const state = {
       screen: "main",
       previousFocus: null,
-      toastTimer: null
+      toastTimer: null,
+      screenVisibilityTimer: null
     };
 
     const elements = {
+      topBalance: document.querySelector(".top-balance"),
+      bottomSummary: document.querySelector(".bottom-summary"),
+      fixedBottomSummary: document.querySelector(".fixed-bottom-summary"),
       screenTitle: document.getElementById("screenTitle"),
       dataButton: document.getElementById("dataButton"),
       currentBalance: document.getElementById("currentBalance"),
@@ -1062,26 +1222,24 @@
     }
 
     function clone(value) {
+      if (typeof structuredClone === "function") return structuredClone(value);
       return JSON.parse(JSON.stringify(value));
     }
 
     function setupLayoutObservers() {
       if (!("ResizeObserver" in window)) return;
       const observer = new ResizeObserver(syncLayoutInsets);
-      [".top-balance", ".bottom-summary", ".fixed-bottom-summary"].forEach(selector => {
-        const element = document.querySelector(selector);
-        if (element) observer.observe(element);
-      });
+      [elements.topBalance, elements.bottomSummary, elements.fixedBottomSummary]
+        .filter(Boolean)
+        .forEach(element => observer.observe(element));
+      state.layoutObserver = observer;
     }
 
     function syncLayoutInsets() {
-      const header = document.querySelector(".top-balance");
-      const footer = state.screen === "fixed"
-        ? document.querySelector(".fixed-bottom-summary")
-        : document.querySelector(".bottom-summary");
+      const footer = state.screen === "fixed" ? elements.fixedBottomSummary : elements.bottomSummary;
 
-      if (header) {
-        document.documentElement.style.setProperty("--header-h", `${Math.ceil(header.getBoundingClientRect().height)}px`);
+      if (elements.topBalance) {
+        document.documentElement.style.setProperty("--header-h", `${Math.ceil(elements.topBalance.getBoundingClientRect().height)}px`);
       }
       if (footer) {
         document.documentElement.style.setProperty("--footer-h", `${Math.ceil(footer.getBoundingClientRect().height)}px`);
@@ -1258,6 +1416,14 @@
 
     function applyScreenVisibility() {
       const fixed = state.screen === "fixed";
+      const activeScreen = fixed ? elements.fixedCostScreen : elements.mainScreen;
+      const inactiveScreen = fixed ? elements.mainScreen : elements.fixedCostScreen;
+
+      clearTimeout(state.screenVisibilityTimer);
+      activeScreen.classList.remove("screen-hidden");
+      activeScreen.inert = false;
+      inactiveScreen.inert = true;
+
       document.body.classList.toggle("fixed-screen", fixed);
       elements.mainScreen.setAttribute("aria-hidden", String(fixed));
       elements.fixedCostScreen.setAttribute("aria-hidden", String(!fixed));
@@ -1265,6 +1431,11 @@
       elements.screenSwitchButton.textContent = fixed ? "収支管理簿へ" : "固定費管理簿へ";
       elements.addButton.textContent = fixed ? "＋ 固定費追加" : "＋ 予定追加";
       elements.clearTransactionsButton.hidden = fixed;
+
+      state.screenVisibilityTimer = setTimeout(() => {
+        inactiveScreen.classList.add("screen-hidden");
+      }, 360);
+
       requestAnimationFrame(syncLayoutInsets);
     }
 
@@ -1297,11 +1468,11 @@
     function fixedCostGroups({ includeEmpty = true } = {}) {
       const groups = new Map();
 
-      sortedFixedCategories().forEach(category => {
+      data.fixedCategories.forEach(category => {
         groups.set(category, { category, subtotal: 0, items: [] });
       });
 
-      sortedFixedCosts().forEach(item => {
+      data.fixedCosts.forEach(item => {
         if (!groups.has(item.category)) {
           groups.set(item.category, { category: item.category, subtotal: 0, items: [] });
         }
@@ -1311,6 +1482,7 @@
       });
 
       const values = [...groups.values()].sort((a, b) => a.category.localeCompare(b.category, "ja"));
+      values.forEach(group => group.items.sort((a, b) => a.name.localeCompare(b.name, "ja")));
       return includeEmpty ? values : values.filter(group => group.items.length > 0 && group.subtotal > 0);
     }
 
@@ -1326,9 +1498,9 @@
       else element.classList.add("money-zero");
     }
 
-    function openTransactionModal({ mode, item = null }) {
+    function openTransactionModal({ mode, item = null, draft = null }) {
       const isEdit = mode === "edit";
-      const values = {
+      const values = draft || {
         date: isEdit ? item.date : todayAsInputValue(),
         type: isEdit ? item.type : "income",
         name: isEdit ? item.name : "",
@@ -1336,7 +1508,7 @@
       };
 
       openModal(isEdit ? "予定変更" : "予定追加", transactionFormHtml(values), "center");
-      setupTransactionForm(values.type);
+      setupTransactionForm({ mode, item, values });
       setupMoneyInput("transactionAmountInput");
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
@@ -1354,13 +1526,6 @@
     }
 
     function transactionFormHtml(values) {
-      const fixedButtons = fixedCostGroups({ includeEmpty: false }).map(group => `
-        <button class="choice-button" type="button" data-quick-fixed-category="${escapeHtml(group.category)}" data-quick-fixed-amount="${group.subtotal}">
-          <span>${escapeHtml(group.category)}</span>
-          <span class="choice-sub">${formatYen(group.subtotal)}</span>
-        </button>
-      `).join("");
-
       return `
         <div class="field">
           <label for="transactionDateInput">月日</label>
@@ -1373,9 +1538,9 @@
             <button class="type-option" type="button" data-type-option="expense">支出</button>
           </div>
         </div>
-        <div id="fixedQuickArea" class="choice-grid fixed-quick-area" hidden>
-          <p class="hint">固定費カテゴリを選ぶと、<br>名称と合計金額を自動入力します。</p>
-          ${fixedButtons || '<div class="empty-mini">固定費カテゴリが未登録です。</div>'}
+        <div id="fixedQuickArea" class="fixed-quick-area" hidden>
+          <p class="hint">固定費管理簿から、<br>カテゴリ合計または個別明細を引用できます。</p>
+          <button id="openFixedQuoteButton" class="quote-button" type="button">固定費から引用</button>
         </div>
         <div class="field">
           <label for="transactionNameInput">名称</label>
@@ -1392,19 +1557,109 @@
       `;
     }
 
-    function setupTransactionForm(initialType) {
-      setTransactionType(initialType);
+    function setupTransactionForm(context) {
+      setTransactionType(context.values.type);
 
       document.querySelectorAll("[data-type-option]").forEach(button => {
         button.addEventListener("click", () => setTransactionType(button.dataset.typeOption));
       });
 
-      document.querySelectorAll("[data-quick-fixed-category]").forEach(button => {
-        button.addEventListener("click", () => {
-          setTransactionType("expense");
-          document.getElementById("transactionNameInput").value = button.dataset.quickFixedCategory;
-          document.getElementById("transactionAmountInput").value = formatYenInput(button.dataset.quickFixedAmount);
+      const quoteButton = document.getElementById("openFixedQuoteButton");
+      if (quoteButton) {
+        quoteButton.addEventListener("click", () => {
+          openFixedQuoteModal({
+            mode: context.mode,
+            item: context.item,
+            draft: readTransactionDraft()
+          });
         });
+      }
+    }
+
+    function readTransactionDraft() {
+      const selectedType = document.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
+      return {
+        date: document.getElementById("transactionDateInput")?.value || todayAsInputValue(),
+        type: selectedType,
+        name: document.getElementById("transactionNameInput")?.value.trim() || "",
+        amount: parseYenInput(document.getElementById("transactionAmountInput")?.value) || ""
+      };
+    }
+
+    function openFixedQuoteModal(context) {
+      openModal("固定費から引用", fixedQuoteModalHtml(), "center");
+
+      document.querySelectorAll("[data-quote-category-index]").forEach(button => {
+        button.addEventListener("click", () => {
+          const groups = fixedCostGroups({ includeEmpty: false });
+          const group = groups[Number(button.dataset.quoteCategoryIndex)];
+          if (!group) return;
+          applyFixedQuote(context, group.category, group.subtotal);
+        });
+      });
+
+      document.querySelectorAll("[data-quote-detail-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = data.fixedCosts.find(cost => cost.id === button.dataset.quoteDetailId);
+          if (!item) return;
+          applyFixedQuote(context, item.name, item.amount);
+        });
+      });
+
+      document.getElementById("quoteBackButton")?.addEventListener("click", () => {
+        openTransactionModal(context);
+      });
+      document.getElementById("quoteCancelButton")?.addEventListener("click", closeModal);
+    }
+
+    function fixedQuoteModalHtml() {
+      const groups = fixedCostGroups({ includeEmpty: false });
+      if (!groups.length) {
+        return `
+          <div class="empty-mini">固定費明細がありません。<br>固定費管理簿で登録してください。</div>
+          <div class="actions">
+            <button class="secondary-button" type="button" id="quoteBackButton">戻る</button>
+            <button class="secondary-button" type="button" id="quoteCancelButton">キャンセル</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="fixed-quote-list">
+          ${groups.map((group, index) => `
+            <div class="fixed-quote-group">
+              <div class="fixed-quote-group-head">
+                <div class="fixed-quote-title">
+                  <strong>${escapeHtml(group.category)}</strong>
+                  <span>${formatYen(group.subtotal)} / ${group.items.length}件</span>
+                </div>
+                <button class="quote-category-button" type="button" data-quote-category-index="${index}">カテゴリで引用</button>
+              </div>
+              ${group.items.map(item => `
+                <div class="fixed-quote-item">
+                  <div class="fixed-quote-name">${escapeHtml(item.name)}<small>${formatYen(item.amount)}</small></div>
+                  <button class="quote-detail-button" type="button" data-quote-detail-id="${escapeHtml(item.id)}">個別で引用</button>
+                </div>
+              `).join("")}
+            </div>
+          `).join("")}
+        </div>
+        <div class="actions">
+          <button class="secondary-button" type="button" id="quoteBackButton">戻る</button>
+          <button class="secondary-button" type="button" id="quoteCancelButton">キャンセル</button>
+        </div>
+      `;
+    }
+
+    function applyFixedQuote(context, name, amount) {
+      openTransactionModal({
+        ...context,
+        draft: {
+          ...context.draft,
+          type: "expense",
+          name,
+          amount
+        }
       });
     }
 
@@ -1546,10 +1801,10 @@
       return `
         <div class="field">
           <label for="fixedCategoryInput">カテゴリ</label>
-          <input id="fixedCategoryInput" type="text" value="${escapeHtml(values.category)}">
+          <input id="fixedCategoryInput" type="text" value="${escapeHtml(values.category)}" placeholder="入力で新規カテゴリを作成">
           ${categoryChips ? `
             <div class="category-chip-area">
-              <div class="chip-title">既存カテゴリ</div>
+              <div class="chip-title">既存カテゴリから選択</div>
               <div class="category-chip-list">${categoryChips}</div>
             </div>
           ` : ""}
@@ -1635,27 +1890,24 @@
 
     function openDataModal() {
       openModal("データバックアップ・復元", `
-        <p class="backup-lead">データを文字列として保存できます。<br>別端末への移行や復元に使えます。</p>
-
         <div class="section-title">バックアップ</div>
         <div class="actions">
-          <button class="primary-button" type="button" id="copyBackupButton">バックアップをコピー</button>
+          <button class="primary-button" type="button" id="copyBackupButton">バックアップコードをコピー</button>
         </div>
         <div id="backupStatus" class="tiny-status" aria-live="polite"></div>
         <div id="backupOutput" class="backup-output field">
-          <label for="backupText">バックアップ文字列</label>
+          <label for="backupText">バックアップコード</label>
           <textarea id="backupText" readonly></textarea>
         </div>
 
         <div class="section-title">復元</div>
-        <p class="restore-field-hint">保存しておいたバックアップ文字列を貼り付けてください。</p>
         <div class="field">
-          <label for="importText">バックアップ文字列</label>
-          <textarea id="importText" placeholder="ここにバックアップ文字列を貼り付け"></textarea>
+          <label for="importText">バックアップコード</label>
+          <textarea id="importText" placeholder="ここにバックアップコードを貼り付け"></textarea>
         </div>
         <div class="actions">
           <button class="secondary-button" type="button" id="pasteBackupButton">貼り付け</button>
-          <button class="danger-button" type="button" id="importButton">読み込む</button>
+          <button class="primary-button" type="button" id="importButton">読み込む</button>
         </div>
         <div class="actions">
           <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
@@ -1663,18 +1915,51 @@
       `);
 
       document.getElementById("copyBackupButton").addEventListener("click", async () => {
+        const button = document.getElementById("copyBackupButton");
         const status = document.getElementById("backupStatus");
         const output = document.getElementById("backupOutput");
         const textarea = document.getElementById("backupText");
-        status.textContent = "バックアップ作成中です。";
-        const text = await encodeExportString(data);
-        const copied = await copyText(text);
-        textarea.value = text;
-        output.classList.toggle("open", !copied);
-        status.textContent = copied
-          ? `バックアップをコピーしました。予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件`
-          : "自動コピーできませんでした。下の文字列を長押ししてコピーしてください。";
+        const outputWasOpen = output.classList.contains("open");
+
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+
+        if (!outputWasOpen) {
+          status.classList.remove("status-success");
+          status.textContent = "バックアップ作成中です。";
+        }
+
+        try {
+          const text = await encodeExportString(data);
+          const copied = await copyText(text);
+
+          if (textarea.value !== text) textarea.value = text;
+
+          if (copied) {
+            output.classList.remove("open");
+            status.classList.add("status-success");
+            status.innerHTML = `バックアップをコピーしました。<br>予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件`;
+            return;
+          }
+
+          if (!outputWasOpen) output.classList.add("open");
+          status.classList.remove("status-success");
+          status.textContent = "";
+          showToast("自動コピーできませんでした。\nバックアップコードを手動でコピーして、保管してください。");
+          selectBackupText(textarea);
+        } finally {
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+        }
       });
+
+      function selectBackupText(textarea) {
+        requestAnimationFrame(() => {
+          textarea.focus({ preventScroll: true });
+          textarea.select();
+          textarea.setSelectionRange(0, textarea.value.length);
+        });
+      }
 
       document.getElementById("pasteBackupButton").addEventListener("click", async () => {
         const textarea = document.getElementById("importText");
@@ -1689,7 +1974,7 @@
       document.getElementById("importButton").addEventListener("click", async () => {
         const raw = document.getElementById("importText").value.trim();
         if (!raw) {
-          showToast("バックアップ文字列を貼り付けてください。");
+          showToast("バックアップコードを貼り付けてください。");
           return;
         }
 
@@ -1697,17 +1982,17 @@
         try {
           imported = await decodeExportString(raw);
         } catch {
-          showToast("読み込みに失敗しました。バックアップ文字列が壊れている可能性があります。");
+          showToast("読み込みに失敗しました。バックアップコードが壊れている可能性があります。");
           return;
         }
 
         const ok = await showConfirm({
           title: "バックアップから読み込み",
+          leadMessage: "今のデータをバックアップ内容で上書きします。",
           message:
-            `今のデータをバックアップ内容で上書きします。\n` +
             `現在：予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件 / カテゴリ ${data.fixedCategories.length}件 / 残高 ${formatYen(data.currentBalance)}\n` +
             `復元：予定 ${imported.transactions.length}件 / 固定費 ${imported.fixedCosts.length}件 / カテゴリ ${imported.fixedCategories.length}件 / 残高 ${formatYen(imported.currentBalance)}`,
-          danger: true,
+          danger: false,
           confirmText: "読み込む"
         });
         if (!ok) return;
@@ -1842,9 +2127,12 @@
     }
 
     function bytesToBase64Url(bytes) {
-      let binary = "";
-      for (const byte of bytes) binary += String.fromCharCode(byte);
-      return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+      const chunks = [];
+      const chunkSize = 0x8000;
+      for (let index = 0; index < bytes.length; index += chunkSize) {
+        chunks.push(String.fromCharCode(...bytes.subarray(index, index + chunkSize)));
+      }
+      return btoa(chunks.join("")).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
     }
 
     function base64UrlToBytes(text) {
@@ -1873,8 +2161,7 @@
       elements.modalBackdrop.classList.remove("tone-income", "tone-expense");
       elements.modalBackdrop.classList.add("open");
       requestAnimationFrame(() => {
-        const focusTarget = firstFocusableElement(elements.modalBackdrop) || elements.modalBackdrop;
-        focusTarget.focus();
+        elements.modalBackdrop.focus({ preventScroll: true });
       });
     }
 
@@ -1929,9 +2216,14 @@
       }
     }
 
-    function showConfirm({ title, message, confirmText = "削除", cancelText = "キャンセル", danger = false }) {
+    function showConfirm({ title, message, leadMessage = "", confirmText = "削除", cancelText = "キャンセル", danger = false }) {
       return new Promise(resolve => {
+        const leadHtml = leadMessage
+          ? `<p class="confirm-lead">${escapeHtml(leadMessage).replaceAll("\n", "<br>")}</p>`
+          : "";
+
         openModal(title, `
+          ${leadHtml}
           <div class="confirm-box">
             <div class="confirm-message">${escapeHtml(message).replaceAll("\n", "<br>")}</div>
           </div>
@@ -1963,13 +2255,15 @@
       const input = document.getElementById(inputId);
       if (!input) return;
 
-      input.addEventListener("input", () => {
+      input.addEventListener("focus", () => {
         const parsed = parseYenInput(input.value);
-        input.value = parsed === null ? "" : formatYenInput(parsed);
-        requestAnimationFrame(() => {
-          const end = input.value.length;
-          try { input.setSelectionRange(end, end); } catch {}
-        });
+        input.value = parsed === null ? "" : String(parsed);
+        input.select();
+      });
+
+      input.addEventListener("input", () => {
+        // 入力中は整形しない。
+        // 中間の数字を編集できるよう、カーソル位置も動かさない。
       });
 
       input.addEventListener("blur", () => {
@@ -1988,7 +2282,7 @@
     function formatYenInput(value) {
       const number = Number(String(value ?? "").replace(/[^0-9]/g, ""));
       if (!Number.isFinite(number) || number <= 0) return "";
-      return `¥ ${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(Math.trunc(number))}`;
+      return `¥ ${INTEGER_FORMATTER.format(Math.trunc(number))}`;
     }
 
     function readPositiveAmount(inputId) {
@@ -2001,11 +2295,7 @@
     }
 
     function formatYen(value) {
-      return new Intl.NumberFormat("ja-JP", {
-        style: "currency",
-        currency: "JPY",
-        maximumFractionDigits: 0
-      }).format(value);
+      return YEN_FORMATTER.format(value);
     }
 
     function formatSignedYen(value) {
