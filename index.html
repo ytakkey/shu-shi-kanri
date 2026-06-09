@@ -6,217 +6,171 @@
   <title>収支管理簿</title>
   <style>
     :root {
-      --bg: #f4f6f5;
-      --panel: #ffffff;
-      --line: #d8e2dc;
-      --text: #1f2933;
-      --muted: #667085;
+      --bg-main: #eef8f4;
+      --bg-fixed: #eef6ff;
+      --panel: rgba(255, 255, 255, .86);
+      --panel-strong: rgba(255, 255, 255, .94);
+      --line: rgba(100, 116, 139, .32);
+      --text: #172033;
+      --muted: #536074;
       --income: #0f766e;
       --expense: #b42318;
       --accent: #2f855a;
       --accent-dark: #276749;
-      --shadow: 0 8px 24px rgba(16, 24, 40, .08);
-      --top-height: 120px;
-      --bottom-height: 132px;
-      --fixed-bottom-height: 86px;
-      --radius: 16px;
+      --fixed-accent: #2563eb;
+      --fixed-accent-dark: #1d4ed8;
+      --radius: 22px;
+      --inner-width: min(720px, calc(100vw - 36px));
+      --header-h: 164px;
+      --footer-h: 132px;
+      --header-top-gap: 22px;
+      --content-gap: 12px;
+      --footer-bottom-gap: 18px;
+      --floating-gap: 12px;
     }
 
     * { box-sizing: border-box; }
 
+    html { min-height: 100%; }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100%;
       color: var(--text);
-      background: var(--bg);
-      padding-top: calc(var(--top-height) + 22px);
-      padding-bottom: calc(var(--bottom-height) + 104px);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(47, 133, 90, .16), transparent 34%),
+        linear-gradient(135deg, var(--bg-main), #f8fbff);
+      padding-top: calc(var(--header-h) + var(--content-gap));
+      padding-bottom: calc(var(--footer-h) + 92px);
+      transition: background .28s ease;
     }
 
     body.fixed-screen {
-      --accent: #2563eb;
-      --accent-dark: #1d4ed8;
-      padding-bottom: calc(var(--fixed-bottom-height) + 104px);
+      background:
+        radial-gradient(circle at 14% 8%, rgba(37, 99, 235, .16), transparent 34%),
+        linear-gradient(135deg, var(--bg-fixed), #f8fbff);
     }
 
     button,
     input,
-    textarea { font: inherit; }
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
 
     .top-balance {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      min-height: var(--top-height);
+      inset: 0 0 auto;
       z-index: 20;
-      background: linear-gradient(135deg, #e7f6ed, #ffffff);
-      border-bottom: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .45);
+      background: rgba(237, 248, 244, .74);
+      backdrop-filter: blur(18px) saturate(1.35);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      padding: calc(var(--header-top-gap) + env(safe-area-inset-top)) 0 16px;
     }
 
     body.fixed-screen .top-balance {
-      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      background: rgba(238, 246, 255, .74);
     }
 
     .top-inner,
     .bottom-inner,
     .main {
-      width: min(720px, 100%);
+      width: var(--inner-width);
       margin: 0 auto;
     }
 
     .header-topbar {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 12px;
     }
 
-    .screen-badge {
-      display: block;
+    .screen-title {
+      margin: 0;
       color: var(--accent-dark);
-      font-size: 26px;
+      font-size: clamp(27px, 5.8vw, 34px);
       line-height: 1.05;
       font-weight: 900;
-      letter-spacing: -.04em;
-      white-space: nowrap;
-      text-shadow: 0 8px 22px rgba(47, 133, 90, .16);
+      letter-spacing: -.03em;
     }
 
-    .screen-badge::after {
-      content: "Household Book";
-      display: block;
-      margin-top: 5px;
+    body.fixed-screen .screen-title {
+      color: var(--fixed-accent-dark);
+    }
+
+    .data-button {
+      flex: 0 0 auto;
+      border: 1px solid rgba(100, 116, 139, .30);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .90);
       color: var(--muted);
-      font-size: 11px;
-      line-height: 1;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .56);
+      padding: 9px 13px;
+      font-size: 13px;
+      line-height: 1.1;
       font-weight: 800;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      opacity: .72;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    body.fixed-screen .screen-badge {
-      color: var(--accent-dark);
-      text-shadow: 0 8px 22px rgba(37, 99, 235, .16);
+    .balance-area {
+      margin-top: 14px;
     }
 
-    body.fixed-screen .screen-badge::after {
-      content: "Fixed Cost Ledger";
+    body.fixed-screen .balance-area {
+      display: none;
     }
 
     .label {
       color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-
-    .balance-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 6px;
-    }
-
-    .balance-amount {
-      font-size: 32px;
-      line-height: 1;
+      font-size: 14px;
       font-weight: 800;
-      letter-spacing: -.03em;
-      font-variant-numeric: tabular-nums;
+      margin-bottom: 8px;
     }
 
     .editable-balance {
       width: 100%;
-      border: 1px solid rgba(47, 133, 90, .30);
-      background: rgba(255, 255, 255, .86);
+      min-height: 66px;
+      border: 1px solid rgba(47, 133, 90, .25);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .62);
       color: var(--text);
-      border-radius: 18px;
-      padding: 10px 12px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .70);
+      padding: 12px 16px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .72), 0 4px 12px rgba(47, 133, 90, .10);
-      cursor: pointer;
       text-align: left;
+      cursor: pointer;
+      font-size: clamp(34px, 8.6vw, 48px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      font-variant-numeric: tabular-nums;
     }
 
     .editable-balance::after {
       content: "タップして編集";
       flex: 0 0 auto;
-      border-radius: 999px;
-      background: #e7f6ed;
       color: var(--accent-dark);
-      padding: 5px 8px;
-      font-size: 12px;
+      background: rgba(231, 246, 237, .74);
+      border: 1px solid rgba(47, 133, 90, .16);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
       line-height: 1;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0;
     }
 
-    .editable-balance:active {
-      background: #f2f7f4;
-    }
-
-    body.fixed-screen .editable-balance {
-      border-color: rgba(37, 99, 235, .30);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .72), 0 4px 12px rgba(37, 99, 235, .10);
-    }
-
-    body.fixed-screen .editable-balance::after {
-      background: #dbeafe;
-      color: var(--accent-dark);
-    }
-
-    .data-management {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-    }
-
-    .ghost-button {
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--accent-dark);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .subtle-button {
-      border-color: rgba(216, 226, 220, .9);
-      background: rgba(255, 255, 255, .72);
-      color: var(--muted);
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .switch-button {
-      border-color: rgba(47, 133, 90, .45);
-      background: #e7f6ed;
-      color: var(--accent-dark);
-      box-shadow: 0 4px 12px rgba(47, 133, 90, .12);
-    }
-
-    body.fixed-screen .switch-button {
-      border-color: rgba(37, 99, 235, .42);
-      background: #dbeafe;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, .12);
-    }
-
     .main {
-      padding: 0 12px;
       overflow: hidden;
     }
 
@@ -224,7 +178,7 @@
       display: flex;
       width: 200%;
       transform: translateX(0);
-      transition: transform .34s cubic-bezier(.22, .80, .28, 1);
+      transition: transform .32s cubic-bezier(.22, .80, .28, 1);
       will-change: transform;
     }
 
@@ -234,192 +188,305 @@
 
     .screen {
       flex: 0 0 50%;
-      min-width: 50%;
+      width: 50%;
+      min-width: 0;
+      padding: 0;
     }
 
-    .screen.hidden { display: block; }
-
-    .screen-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
-      margin: 0 0 12px;
+    .list,
+    .empty,
+    .fixed-cost-list {
+      width: 100%;
     }
 
-    .screen-title h1 {
-      margin: 0;
-      font-size: 20px;
-      line-height: 1.25;
-    }
-
-    .screen-title span {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .list {
+    .list,
+    .fixed-cost-group,
+    .empty,
+    .empty-mini,
+    .modal,
+    .bottom-summary,
+    .fixed-bottom-summary {
+      border: 1px solid rgba(100, 116, 139, .22);
       background: var(--panel);
-      border: 1px solid var(--line);
+      backdrop-filter: blur(18px) saturate(1.32);
+      -webkit-backdrop-filter: blur(18px) saturate(1.32);
+      box-shadow: none;
+    }
+
+    .list,
+    .fixed-cost-group,
+    .empty {
       border-radius: var(--radius);
       overflow: hidden;
-      box-shadow: var(--shadow);
     }
 
-    .row {
-      width: 100%;
-      border: 0;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: 54px 1fr auto;
-      gap: 10px;
-      align-items: center;
-      padding: 14px 14px;
-      text-align: left;
-      cursor: pointer;
+    .row,
+    .fixed-cost-item {
+      border-bottom: 1px solid rgba(100, 116, 139, .20);
+      background: transparent;
     }
 
-    .row:last-child { border-bottom: 0; }
-    .row:active { background: #f2f7f4; }
+    .row:last-child,
+    .fixed-cost-item:last-child {
+      border-bottom: 0;
+    }
 
     .transaction-row {
-      grid-template-columns: 1fr auto;
-      gap: 0;
-      padding: 0;
-      cursor: default;
-    }
-
-    .transaction-edit-button {
-      min-width: 0;
-      border: 0;
-      background: transparent;
       display: grid;
-      grid-template-columns: 54px 1fr auto;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
       align-items: center;
-      padding: 14px;
-      text-align: left;
-      cursor: pointer;
+      padding: 0 10px 0 0;
     }
 
-    .transaction-delete-button {
-      align-self: center;
-      margin-right: 12px;
-    }
-
-    .transaction-edit-button:active {
-      background: rgba(255, 255, 255, .38);
+    .transaction-info {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      gap: 3px;
+      align-items: center;
+      padding: 14px 4px 14px 14px;
     }
 
     .date {
       color: var(--muted);
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 400;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .name {
       min-width: 0;
-      font-weight: 700;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 400;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .category {
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .amount {
-      font-weight: 800;
+    .amount,
+    .fixed-cost-amount {
+      font-size: 15px;
+      font-weight: 400;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
 
     .amount.income,
     .money-positive { color: var(--income) !important; }
-
     .amount.expense,
     .money-negative { color: var(--expense) !important; }
-
     .money-zero { color: var(--text) !important; }
+
+    .mini-button,
+    .mini-danger-button {
+      border: 1px solid rgba(100, 116, 139, .22);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .mini-button {
+      background: rgba(248, 250, 252, .92);
+      color: var(--text);
+    }
+
+    .mini-danger-button {
+      background: rgba(254, 226, 226, .92);
+      border-color: rgba(180, 35, 24, .20);
+      color: var(--expense);
+    }
+
+    .fixed-cost-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .fixed-cost-group {
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    .fixed-cost-group-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 16px 16px;
+      background: rgba(219, 234, 254, .82);
+      border-bottom: 1px solid rgba(37, 99, 235, .22);
+    }
+
+    .fixed-cost-head-title {
+      min-width: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      color: var(--fixed-accent-dark);
+      font-weight: 900;
+      font-size: 15px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fixed-cost-head-title small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .fixed-cost-head-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .fixed-cost-head-actions strong {
+      font-size: 15px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fixed-cost-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 14px 14px 14px 16px;
+    }
+
+    .fixed-cost-name {
+      min-width: 0;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 400;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .empty,
     .empty-mini {
-      background: #fff;
-      border: 1px dashed #b7c7bd;
-      border-radius: var(--radius);
       color: var(--muted);
-      padding: 32px 16px;
+      font-weight: 900;
       text-align: center;
-      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .empty {
+      padding: 30px 16px;
     }
 
     .empty-mini {
-      padding: 18px 14px;
-      font-weight: 800;
+      border-radius: 18px;
+      padding: 18px 12px;
+    }
+
+    .floating-actions {
+      position: fixed;
+      left: max(18px, calc((100vw - 720px) / 2 + 18px));
+      right: max(18px, calc((100vw - 720px) / 2 + 18px));
+      bottom: calc(var(--footer-h) + 22px);
+      z-index: 18;
+      display: flex;
+      align-items: center;
+      gap: var(--floating-gap);
+      pointer-events: none;
+    }
+
+    .floating-spacer {
+      flex: 1 1 auto;
+      min-width: 8px;
+    }
+
+    .floating-nav,
+    .floating-clear,
+    .floating-add {
+      min-width: 0;
+      min-height: 52px;
+      border-radius: 999px;
+      padding: 0 18px;
+      border: 1px solid rgba(255, 255, 255, .56);
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: none;
+      pointer-events: auto;
+    }
+
+    .floating-nav {
+      flex: 0 1 auto;
+      color: var(--accent-dark);
+      background: rgba(255, 255, 255, .78);
+      border-color: rgba(39, 103, 73, .30);
+    }
+
+    body.fixed-screen .floating-nav {
+      color: var(--fixed-accent-dark);
+      border-color: rgba(29, 78, 216, .30);
+    }
+
+    .floating-clear {
+      flex: 0 0 auto;
+      color: var(--expense);
+      background: rgba(255, 255, 255, .74);
+      border-color: rgba(180, 35, 24, .22);
     }
 
     .floating-add {
-      position: fixed;
-      right: max(16px, calc((100vw - 720px) / 2 + 16px));
-      bottom: calc(var(--bottom-height) + 34px);
-      z-index: 18;
-      border: 0;
-      border-radius: 999px;
-      background: var(--accent);
+      flex: 0 0 auto;
       color: #fff;
-      padding: 14px 18px;
-      font-weight: 800;
-      box-shadow: 0 12px 24px rgba(47, 133, 90, .32);
-      cursor: pointer;
+      background: var(--accent);
+      border-color: rgba(255, 255, 255, .36);
     }
 
-    body.fixed-screen .bottom-summary { display: none; }
-
     body.fixed-screen .floating-add {
-      bottom: 22px;
-      background: var(--accent);
-      box-shadow: 0 12px 24px rgba(37, 99, 235, .26);
+      background: var(--fixed-accent);
+    }
+
+    body.fixed-screen .floating-clear {
+      display: none;
     }
 
     .bottom-summary,
     .fixed-bottom-summary {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: auto 0 0;
       z-index: 20;
-      background: #ffffff;
-      border-top: 1px solid var(--line);
-      box-shadow: 0 -8px 24px rgba(16, 24, 40, .08);
-      padding: 12px 18px 16px;
+      border-width: 1px 0 0;
+      border-radius: 0;
+      background: rgba(255, 255, 255, .78);
+      padding: 14px 0 calc(var(--footer-bottom-gap) + env(safe-area-inset-bottom));
     }
 
-    .bottom-summary {
-      min-height: var(--bottom-height);
-    }
-
-    .fixed-bottom-summary {
+    body.fixed-screen .bottom-summary,
+    body:not(.fixed-screen) .fixed-bottom-summary {
       display: none;
-      min-height: var(--fixed-bottom-height);
     }
 
-    body.fixed-screen .fixed-bottom-summary {
-      display: block;
+    .summary-grid {
+      display: grid;
+      gap: 8px;
     }
-
-    .summary-grid { display: grid; gap: 6px; }
 
     .summary-line {
       display: flex;
-      justify-content: space-between;
       align-items: baseline;
+      justify-content: space-between;
       gap: 12px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .summary-line span:first-child {
@@ -428,149 +495,132 @@
     }
 
     .summary-line span:last-child {
-      font-size: 20px;
+      font-size: 22px;
       font-variant-numeric: tabular-nums;
     }
 
     .summary-line.total {
-      border-top: 1px solid var(--line);
-      padding-top: 8px;
+      border-top: 1px solid rgba(148, 163, 184, .28);
       margin-top: 4px;
+      padding-top: 10px;
     }
 
-    .summary-line.total span:last-child { font-size: 26px; }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:first-child {
-      color: var(--accent-dark);
+    .summary-line.total span:last-child {
+      font-size: clamp(28px, 7vw, 34px);
       font-weight: 900;
+      letter-spacing: -.04em;
     }
 
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:last-child {
-      color: var(--accent-dark);
-      font-size: 28px;
+    .fixed-bottom-summary .summary-line.total {
+      border-top: 0;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .fixed-bottom-summary .summary-line.total span:first-child {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .fixed-bottom-summary .summary-line.total span:last-child {
+      color: var(--fixed-accent-dark);
+      font-size: clamp(28px, 7vw, 34px);
       font-weight: 900;
+      letter-spacing: -.04em;
     }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: rgba(15, 23, 42, .42);
       display: none;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
       padding: 16px;
+      background: rgba(15, 23, 42, .34);
     }
 
-    .modal-backdrop.open { display: flex; }
-    .modal-backdrop.center { align-items: center; }
+    .modal-backdrop.open {
+      display: flex;
+    }
 
     .modal {
       width: min(560px, 100%);
-      background: #fff;
-      border-radius: 22px;
-      box-shadow: 0 24px 64px rgba(15, 23, 42, .24);
-      padding: 18px;
-      max-height: 86vh;
+      max-height: min(86vh, 720px);
       overflow: auto;
+      border-radius: 24px;
+      padding: 18px;
+      background: rgba(255, 255, 255, .88);
+    }
+
+    .modal-backdrop.tone-income .modal {
+      background: linear-gradient(135deg, rgba(231, 246, 237, .94), rgba(255, 255, 255, .92));
+    }
+
+    .modal-backdrop.tone-expense .modal {
+      background: linear-gradient(135deg, rgba(254, 242, 242, .94), rgba(255, 255, 255, .92));
     }
 
     .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
       margin-bottom: 14px;
     }
 
     .modal-title {
-      font-size: 20px;
+      margin: 0;
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1.2;
       font-weight: 900;
+      letter-spacing: -.03em;
     }
 
     .field {
       display: grid;
       gap: 7px;
-      margin: 14px 0;
+      margin: 13px 0;
     }
 
-    .field label {
+    .field label,
+    .restore-field-hint,
+    .section-title,
+    .chip-title {
       color: var(--muted);
       font-size: 13px;
-      font-weight: 800;
+      line-height: 1.35;
+      font-weight: 900;
     }
 
     .field input,
-    .field select,
     .field textarea {
       width: 100%;
-      border: 1px solid #cfd8d3;
-      border-radius: 14px;
-      padding: 13px 14px;
+      border: 1px solid rgba(100, 116, 139, .36);
+      border-radius: 16px;
       outline: none;
-      background: #fff;
+      background: rgba(255, 255, 255, .94);
+      color: var(--text);
+      padding: 12px 13px;
     }
 
     .field textarea {
-      min-height: 120px;
+      min-height: 112px;
       resize: vertical;
       word-break: break-all;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     .field input:focus,
-    .field select:focus,
     .field textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 4px rgba(47, 133, 90, .12);
     }
 
-    .choice-grid {
-      display: grid;
-      gap: 10px;
-      margin: 14px 0;
+    body.fixed-screen .field input:focus,
+    body.fixed-screen .field textarea:focus {
+      border-color: var(--fixed-accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
     }
-
-    .choice-button {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 16px;
-      padding: 16px 14px;
-      text-align: left;
-      cursor: pointer;
-      font-weight: 900;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .choice-button:active { background: #f2f7f4; }
-
-    .choice-button.choice-income {
-      background: #ecfdf3;
-      border-color: #abefc6;
-      color: var(--income);
-    }
-
-    .choice-button.choice-expense {
-      background: #fef3f2;
-      border-color: #fecdca;
-      color: var(--expense);
-    }
-
-    .choice-button.choice-income .choice-sub,
-    .choice-button.choice-expense .choice-sub {
-      color: inherit;
-      opacity: .72;
-    }
-
-    .choice-button.choice-income:active { background: #dff8eb; }
-    .choice-button.choice-expense:active { background: #fee4e2; }
-
 
     .type-toggle {
       display: grid;
@@ -578,1030 +628,200 @@
       gap: 10px;
     }
 
-    .type-option {
-      border: 1px solid rgba(255, 255, 255, .62);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .58);
-      color: var(--muted);
-      padding: 14px;
-      font-weight: 900;
+    .type-option,
+    .choice-button,
+    .category-chip {
       cursor: pointer;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .70), 0 8px 24px rgba(16, 24, 40, .06);
-      backdrop-filter: blur(14px) saturate(1.2);
-      -webkit-backdrop-filter: blur(14px) saturate(1.2);
-      transition: background .16s ease, border-color .16s ease, color .16s ease, transform .12s ease, box-shadow .16s ease;
+      border: 1px solid rgba(100, 116, 139, .26);
+      background: rgba(255, 255, 255, .90);
     }
 
-    .type-option:active {
-      transform: translateY(1px);
+    .type-option {
+      min-height: 52px;
+      border-radius: 17px;
+      color: var(--muted);
+      font-weight: 900;
     }
 
     .type-option.selected-income {
-      background: linear-gradient(135deg, rgba(236, 253, 243, .94), rgba(255, 255, 255, .72));
-      border-color: rgba(15, 118, 110, .38);
+      background: rgba(15, 118, 110, .14);
+      border-color: rgba(15, 118, 110, .34);
       color: var(--income);
-      box-shadow: 0 14px 30px rgba(15, 118, 110, .14), inset 0 1px 0 rgba(255, 255, 255, .82);
     }
 
     .type-option.selected-expense {
-      background: linear-gradient(135deg, rgba(254, 243, 242, .96), rgba(255, 255, 255, .72));
-      border-color: rgba(180, 35, 24, .34);
+      background: rgba(180, 35, 24, .12);
+      border-color: rgba(180, 35, 24, .30);
       color: var(--expense);
-      box-shadow: 0 14px 30px rgba(180, 35, 24, .12), inset 0 1px 0 rgba(255, 255, 255, .82);
     }
 
-    .fixed-quick-area[hidden] {
+    .choice-grid {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .choice-grid[hidden] {
       display: none;
+    }
+
+    .choice-button {
+      width: 100%;
+      border-radius: 17px;
+      padding: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--text);
+      font-weight: 900;
+      text-align: left;
     }
 
     .choice-sub {
       color: var(--muted);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 900;
       white-space: nowrap;
+    }
+
+    .fixed-quick-area {
+      border: 1px solid rgba(148, 163, 184, .22);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .48);
+      padding: 10px;
+    }
+
+    .hint,
+    .backup-lead,
+    .confirm-message,
+    .restore-field-hint,
+    .tiny-status {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.38;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .section-title {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(148, 163, 184, .22);
+    }
+
+    .category-chip-area {
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .category-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .category-chip {
+      border-radius: 999px;
+      color: var(--fixed-accent-dark);
+      background: rgba(219, 234, 254, .66);
+      padding: 7px 11px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .confirm-box {
+      border: 1px solid rgba(148, 163, 184, .22);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .52);
+      padding: 13px;
+      margin-top: 6px;
     }
 
     .actions {
       display: flex;
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
     .primary-button,
     .secondary-button,
     .danger-button {
       flex: 1;
-      border: 0;
-      border-radius: 14px;
-      padding: 13px 14px;
+      min-height: 46px;
+      border: 1px solid rgba(100, 116, 139, .22);
+      border-radius: 15px;
+      padding: 11px 12px;
       font-weight: 900;
       cursor: pointer;
     }
 
-    .primary-button { background: var(--accent); color: #fff; }
-    .secondary-button { background: #eef2f0; color: var(--text); }
-    .danger-button { background: #fee4e2; color: var(--expense); }
+    .primary-button { background: var(--accent); border-color: rgba(47, 133, 90, .38); color: #fff; }
+    body.fixed-screen .primary-button { background: var(--fixed-accent); border-color: rgba(37, 99, 235, .38); }
+    .secondary-button { background: rgba(248, 250, 252, .94); color: var(--text); }
+    .danger-button { background: rgba(254, 226, 226, .96); border-color: rgba(180, 35, 24, .24); color: var(--expense); }
 
-    .confirm-box,
-    .fixed-total-card,
-    .fixed-form-card {
-      background: #f8faf9;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .confirm-row,
-    .fixed-total-line,
-    .fixed-category-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
-      font-weight: 800;
-    }
-
-    .confirm-row span:first-child,
-    .fixed-total-line span:first-child,
-    .fixed-category-line span:first-child { color: var(--muted); }
-
-    .confirm-row strong,
-    .fixed-total-line strong,
-    .fixed-category-line strong {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-      margin: 8px 0 0;
-    }
-
-    .section-title {
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
-      font-weight: 900;
-    }
-
-    .tiny-status {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
-      word-break: break-all;
-    }
-
-    .fixed-total-card {
-      margin: 12px 0;
-      gap: 10px;
-    }
-
-    .fixed-total-line {
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 10px;
-    }
-
-    .fixed-total-line strong { font-size: 22px; }
-
-    .fixed-cost-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .fixed-cost-group {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: var(--shadow);
-    }
-
-    .fixed-cost-group-head {
-      background: #f8faf9;
-      border-bottom: 1px solid var(--line);
-      padding: 12px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      font-weight: 900;
-    }
-
-    body.fixed-screen .fixed-cost-group-head {
-      background: #f8fbff;
-    }
-
-    .fixed-cost-head-title {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fixed-cost-head-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 0 0 auto;
-    }
-
-    .fixed-cost-group-head small {
-      color: var(--muted);
-      font-weight: 700;
-      margin-left: 6px;
-    }
-
-    .fixed-cost-group-head strong:last-child {
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .fixed-cost-item {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      gap: 8px;
-      align-items: center;
-      padding: 11px 14px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .fixed-cost-item:last-child { border-bottom: 0; }
-
-    .fixed-cost-name {
-      min-width: 0;
-      font-weight: 800;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fixed-cost-amount {
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .mini-button,
-    .mini-danger-button {
-      border: 0;
-      border-radius: 999px;
-      padding: 6px 9px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .mini-button { background: #eef2f0; color: var(--text); }
-    .mini-danger-button { background: #fee4e2; color: var(--expense); }
-
-
-
-    /* Liquid Glass UI */
-    :root {
-      --glass: rgba(255, 255, 255, .58);
-      --glass-strong: rgba(255, 255, 255, .76);
-      --glass-soft: rgba(255, 255, 255, .42);
-      --glass-line: rgba(255, 255, 255, .52);
-      --glass-shadow: 0 18px 48px rgba(16, 24, 40, .14);
-    }
-
-    body {
-      background:
-        radial-gradient(circle at 18% 0%, rgba(47, 133, 90, .22), transparent 34%),
-        radial-gradient(circle at 88% 12%, rgba(125, 211, 252, .24), transparent 32%),
-        radial-gradient(circle at 52% 100%, rgba(187, 247, 208, .32), transparent 38%),
-        linear-gradient(135deg, #f7fbf8 0%, #eef7f4 48%, #f8fbff 100%);
-      background-attachment: fixed;
-    }
-
-    body.fixed-screen {
-      --top-height: 94px;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(37, 99, 235, .22), transparent 34%),
-        radial-gradient(circle at 88% 12%, rgba(147, 197, 253, .30), transparent 32%),
-        radial-gradient(circle at 52% 100%, rgba(219, 234, 254, .42), transparent 38%),
-        linear-gradient(135deg, #f8fbff 0%, #eef6ff 52%, #f7fbff 100%);
-      background-attachment: fixed;
-      padding-top: calc(var(--top-height) + 18px);
-    }
-
-    .top-balance,
-    .bottom-summary,
-    .fixed-bottom-summary,
-    .modal,
-    .list,
-    .fixed-cost-group,
-    .fixed-total-card,
-    .confirm-box,
-    .fixed-form-card,
-    .empty,
-    .empty-mini {
-      background: var(--glass-strong);
-      border-color: var(--glass-line);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(22px) saturate(1.35);
-      -webkit-backdrop-filter: blur(22px) saturate(1.35);
-    }
-
-    .top-balance {
-      background: linear-gradient(135deg, rgba(231, 246, 237, .72), rgba(255, 255, 255, .52));
-      box-shadow: 0 14px 44px rgba(16, 24, 40, .12);
-    }
-
-    body.fixed-screen .top-balance {
-      background: linear-gradient(135deg, rgba(219, 234, 254, .74), rgba(255, 255, 255, .50));
-    }
-
-    body.fixed-screen .balance-area {
+    .backup-output {
       display: none;
     }
 
-    body.fixed-screen .header-topbar {
-      margin-bottom: 0;
+    .backup-output.open {
+      display: block;
     }
 
-    body.fixed-screen .top-inner {
-      min-height: 56px;
-      display: flex;
-      align-items: center;
-    }
-
-    body.fixed-screen .header-topbar {
-      width: 100%;
-    }
-
-    .row,
-    .choice-button,
-    .field input,
-    .field select,
-    .field textarea,
-    .ghost-button,
-    .secondary-button,
-    .primary-button,
-    .danger-button,
-    .mini-button,
-    .mini-danger-button,
-    .editable-balance {
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .70), 0 8px 24px rgba(16, 24, 40, .06);
-    }
-
-    .row,
-    .choice-button,
-    .field input,
-    .field select,
-    .field textarea {
-      background: rgba(255, 255, 255, .62);
-      border-color: rgba(255, 255, 255, .58);
-      backdrop-filter: blur(14px) saturate(1.2);
-      -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    }
-
-    .row:active,
-    .choice-button:active,
-    .editable-balance:active {
-      transform: translateY(1px);
-      background: rgba(255, 255, 255, .76);
-    }
-
-    .editable-balance {
-      background: linear-gradient(135deg, rgba(255, 255, 255, .72), rgba(231, 246, 237, .68));
-      border-color: rgba(47, 133, 90, .24);
-    }
-
-    .editable-balance::after {
-      background: rgba(231, 246, 237, .86);
-      border: 1px solid rgba(47, 133, 90, .16);
-    }
-
-    .switch-button {
-      background: linear-gradient(135deg, rgba(231, 246, 237, .88), rgba(255, 255, 255, .62));
-      border-color: rgba(47, 133, 90, .34);
-      color: var(--accent-dark);
-    }
-
-    body.fixed-screen .switch-button {
-      background: linear-gradient(135deg, rgba(219, 234, 254, .92), rgba(255, 255, 255, .62));
-      border-color: rgba(37, 99, 235, .34);
-      color: var(--accent-dark);
-    }
-
-    .floating-add {
-      box-shadow: 0 18px 38px rgba(47, 133, 90, .30), inset 0 1px 0 rgba(255, 255, 255, .34);
-    }
-
-    body.fixed-screen .floating-add {
-      box-shadow: 0 18px 38px rgba(37, 99, 235, .28), inset 0 1px 0 rgba(255, 255, 255, .34);
-    }
-
-    .fixed-cost-group-head {
-      background: rgba(255, 255, 255, .48);
-    }
-
-    body.fixed-screen .fixed-cost-group-head {
-      background: rgba(239, 246, 255, .58);
-    }
-
-    .fixed-total-only .fixed-total-line {
-      border-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .screen-title h1 {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: rgba(219, 234, 254, .62);
-      border: 1px solid rgba(37, 99, 235, .16);
-      color: var(--accent-dark);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .68);
-    }
-
-
-    /* Floating action cluster */
-    .floating-actions {
-      position: fixed;
-      left: max(16px, calc((100vw - 720px) / 2 + 16px));
-      right: max(16px, calc((100vw - 720px) / 2 + 16px));
-      bottom: calc(var(--bottom-height) + 34px);
-      z-index: 18;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    body.fixed-screen .floating-actions {
-      bottom: calc(var(--fixed-bottom-height) + 22px);
-    }
-
-    .floating-add,
-    .floating-clear {
-      position: static;
-      right: auto;
-      bottom: auto;
-      flex: 0 0 auto;
-      min-height: 48px;
-      pointer-events: auto;
-    }
-
-    .floating-clear {
-      margin-left: auto;
-      border-radius: 999px;
-      border: 1px solid rgba(180, 35, 24, .24);
-      background: linear-gradient(135deg, rgba(255, 255, 255, .78), rgba(254, 243, 242, .72));
-      color: var(--expense);
-      padding: 14px 16px;
-      font-weight: 900;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 18px 38px rgba(180, 35, 24, .12), inset 0 1px 0 rgba(255, 255, 255, .50);
-      backdrop-filter: blur(18px) saturate(1.25);
-      -webkit-backdrop-filter: blur(18px) saturate(1.25);
-    }
-
-    body.fixed-screen .floating-clear { display: none; }
-
-    .floating-nav {
-      flex: 0 0 auto;
-      min-height: 48px;
-      pointer-events: auto;
-      border-radius: 999px;
-      border: 1px solid rgba(47, 133, 90, .32);
-      background: linear-gradient(135deg, rgba(255, 255, 255, .78), rgba(231, 246, 237, .72));
-      color: var(--accent-dark);
-      padding: 14px 16px;
-      font-weight: 900;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 18px 38px rgba(47, 133, 90, .18), inset 0 1px 0 rgba(255, 255, 255, .50);
-      backdrop-filter: blur(18px) saturate(1.25);
-      -webkit-backdrop-filter: blur(18px) saturate(1.25);
-    }
-
-    body.fixed-screen .floating-nav {
-      border-color: rgba(37, 99, 235, .34);
-      background: linear-gradient(135deg, rgba(255, 255, 255, .80), rgba(219, 234, 254, .76));
-      box-shadow: 0 18px 38px rgba(37, 99, 235, .18), inset 0 1px 0 rgba(255, 255, 255, .50);
-    }
-
-    .floating-nav:active,
-    .floating-clear:active,
-    .floating-add:active {
-      transform: translateY(1px);
-    }
-
-    body.fixed-screen .fixed-cost-group-head {
-      background: linear-gradient(135deg, rgba(219, 234, 254, .92), rgba(255, 255, 255, .74));
-      border-bottom-color: rgba(37, 99, 235, .18);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82);
-    }
-
-    .fixed-cost-head-title {
-      color: var(--accent-dark);
-      font-size: 17px;
-      font-weight: 900;
-    }
-
-    .fixed-total-card.fixed-total-only {
-      margin-top: 16px;
-      padding: 16px;
-      border-color: rgba(37, 99, 235, .22);
-      background: linear-gradient(135deg, rgba(219, 234, 254, .88), rgba(255, 255, 255, .78));
-      box-shadow: 0 20px 48px rgba(37, 99, 235, .18), inset 0 1px 0 rgba(255, 255, 255, .78);
-    }
-
-    .fixed-total-card.fixed-total-only .fixed-total-line span:first-child {
-      color: var(--accent-dark);
-      font-size: 15px;
-      font-weight: 900;
-    }
-
-    .fixed-total-card.fixed-total-only .fixed-total-line strong {
-      color: var(--accent-dark);
-      font-size: 30px;
-      font-weight: 900;
-    }
-
-
-    .modal-backdrop.tone-income .modal {
-      border: 1px solid rgba(15, 118, 110, .30);
-      background: linear-gradient(135deg, rgba(236, 253, 243, .94), rgba(255, 255, 255, .76));
-      box-shadow: 0 26px 70px rgba(15, 118, 110, .20);
-    }
-
-    .modal-backdrop.tone-expense .modal {
-      border: 1px solid rgba(180, 35, 24, .26);
-      background: linear-gradient(135deg, rgba(254, 243, 242, .96), rgba(255, 255, 255, .76));
-      box-shadow: 0 26px 70px rgba(180, 35, 24, .18);
-    }
-
-    .modal-backdrop.tone-income .modal-title { color: var(--income); }
-    .modal-backdrop.tone-expense .modal-title { color: var(--expense); }
-
-    .type-option {
-      position: relative;
-      min-height: 56px;
-      font-size: 17px;
-      border-width: 2px;
-    }
-
-    .type-option::before {
-      content: "";
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 7px;
-      border-radius: 999px;
-      border: 2px solid currentColor;
-      vertical-align: -5px;
-      opacity: .34;
-    }
-
-    .type-option.selected-income::before,
-    .type-option.selected-expense::before {
-      content: "✓";
-      color: #fff;
-      opacity: 1;
-      font-size: 14px;
-      line-height: 1;
-      font-weight: 900;
-    }
-
-    .type-option.selected-income::before { background: var(--income); border-color: var(--income); }
-    .type-option.selected-expense::before { background: var(--expense); border-color: var(--expense); }
-
-
-    @media (max-width: 420px) {
-      :root {
-        --top-height: 122px;
-        --bottom-height: 126px;
-      }
-
-      body.fixed-screen {
-        --top-height: 88px;
-      }
-
-      .balance-amount { font-size: 29px; }
-      .ghost-button { padding: 8px 10px; }
-      .subtle-button { padding: 6px 9px; font-size: 12px; }
-
-      .screen-title {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .editable-balance::after { content: "編集"; }
-      .floating-actions {
-        right: calc(10px + env(safe-area-inset-right));
-        left: calc(10px + env(safe-area-inset-left));
-        bottom: calc(var(--bottom-height) + 24px);
-        gap: 8px;
-        max-width: calc(100vw - 20px - env(safe-area-inset-left) - env(safe-area-inset-right));
-      }
-      body.fixed-screen .floating-actions { bottom: calc(var(--fixed-bottom-height) + 18px); }
-      .floating-nav,
-      .floating-clear,
-      .floating-add {
-        flex: 1 1 0;
-        min-width: 0;
-        padding: 13px 8px;
-        text-align: center;
-        font-size: clamp(12px, 3.35vw, 14px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .floating-add {
-        flex-grow: 1.18;
-      }
-      .floating-clear {
-        flex-grow: .92;
-      }
-      .floating-nav {
-        flex-grow: .98;
-      }
-      .fixed-total-card.fixed-total-only .fixed-total-line strong { font-size: 26px; }
-      .fixed-cost-group-head { align-items: flex-start; }
-      .fixed-cost-head-actions { align-items: flex-end; flex-direction: column; gap: 6px; }
-      .fixed-cost-item { grid-template-columns: 1fr auto; }
-      .fixed-cost-name { grid-column: 1; }
-      .fixed-cost-amount { grid-column: 2; }
-      .fixed-cost-item .mini-button { grid-column: 1; justify-self: start; }
-      .fixed-cost-item .mini-danger-button { grid-column: 2; justify-self: end; }
-
-      .row {
-        grid-template-columns: 48px 1fr auto;
-        padding: 13px 11px;
-        gap: 8px;
-      }
-      .transaction-row {
-        grid-template-columns: 1fr auto;
-        padding: 0;
-        gap: 0;
-      }
-      .transaction-edit-button {
-        grid-template-columns: 48px 1fr auto;
-        padding: 13px 10px;
-        gap: 8px;
-      }
-      .transaction-delete-button {
-        margin-right: 8px;
-        padding: 6px 8px;
-      }
-
-      .amount { font-size: 14px; }
-      .name { font-size: 15px; }
-      .summary-line span:last-child { font-size: 18px; }
-      .summary-line.total span:last-child { font-size: 24px; }
-      .actions { flex-direction: column; }
-    }
-
-
-    .screen {
-      transition: opacity .24s ease;
-    }
-
-    body:not(.fixed-screen) #fixedCostScreen,
-    body.fixed-screen #mainScreen {
-      opacity: .50;
-    }
-
-    .copy-fallback-box {
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .copy-fallback-box textarea {
-      width: 100%;
-      min-height: 120px;
-      border: 1px solid rgba(47, 133, 90, .28);
-      border-radius: 14px;
-      padding: 12px;
-      background: rgba(255, 255, 255, .82);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      word-break: break-all;
-      resize: vertical;
+    .backup-output textarea {
+      min-height: 78px;
     }
 
     .toast {
       position: fixed;
       left: 50%;
-      bottom: 18px;
-      z-index: 220;
+      bottom: calc(var(--footer-h) + 96px);
+      z-index: 120;
+      transform: translateX(-50%) translateY(12px);
       max-width: min(520px, calc(100vw - 32px));
-      transform: translate(-50%, 16px);
+      border-radius: 999px;
+      background: rgba(23, 32, 51, .90);
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 800;
       opacity: 0;
       pointer-events: none;
-      border: 1px solid rgba(255, 255, 255, .70);
-      border-radius: 999px;
-      background: rgba(31, 41, 51, .82);
-      color: #fff;
-      padding: 11px 16px;
-      font-size: 14px;
-      font-weight: 800;
-      text-align: center;
-      backdrop-filter: blur(18px) saturate(145%);
-      -webkit-backdrop-filter: blur(18px) saturate(145%);
-      box-shadow: 0 12px 32px rgba(16, 24, 40, .22);
       transition: opacity .18s ease, transform .18s ease;
     }
 
     .toast.open {
       opacity: 1;
-      transform: translate(-50%, 0);
+      transform: translateX(-50%) translateY(0);
     }
 
-    .modal-title {
-      margin: 0;
-    }
-
-
-    /* v9 requested refinements */
-    .screen-badge {
-      font-size: clamp(32px, 7.8vw, 46px);
-      line-height: .98;
-      letter-spacing: -.055em;
-    }
-
-    .screen-badge::after,
-    body.fixed-screen .screen-badge::after {
-      content: none;
-      display: none;
-    }
-
-    .header-topbar {
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .data-management {
-      padding-top: 2px;
-    }
-
-    .date {
-      white-space: nowrap;
-    }
-
-    .transaction-edit-button {
-      grid-template-columns: 60px minmax(0, 1fr) auto;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .transaction-edit-button .name {
-      min-width: 0;
-    }
-
-    .type-option::before,
-    .type-option.selected-income::before,
-    .type-option.selected-expense::before {
-      content: none;
-      display: none;
-    }
-
-    .type-option.selected-income,
-    .type-option.selected-expense {
-      transform: translateY(-1px);
-    }
-
-    .main,
-    .screen,
-    .screen-slider {
-      overflow: hidden;
-    }
-
-    body:not(.fixed-screen) #fixedCostScreen,
-    body.fixed-screen #mainScreen {
-      opacity: 1;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .fixed-bottom-summary .summary-line.total {
-      border-top: 0;
-      padding-top: 0;
-      margin-top: 0;
-    }
-
-    .backup-lead {
-      margin: 2px 0 10px;
-      line-height: 1.55;
-    }
-
-    .backup-panel {
-      border: 1px solid rgba(255, 255, 255, .58);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .54);
-      padding: 12px;
-      margin-top: 10px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .68), 0 8px 24px rgba(16, 24, 40, .06);
-    }
-
-    .backup-panel-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .backup-panel-head strong {
-      font-weight: 900;
-      color: var(--text);
-    }
-
-    .backup-panel-head span {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .backup-wide-button {
-      width: 100%;
-      flex: none;
-    }
-
-    .compact-field {
-      margin: 8px 0 0;
-    }
-
-    .field textarea.compact-textarea {
-      min-height: 78px;
-      max-height: 128px;
-    }
-
-    .compact-actions {
-      margin-top: 10px;
-    }
-
-    .copy-fallback-box textarea {
-      min-height: 74px;
-      max-height: 120px;
-    }
-
-    @media (max-width: 420px) {
-      .screen-badge {
-        font-size: 35px;
-      }
-
-      .transaction-edit-button {
-        grid-template-columns: 48px minmax(0, 1fr) auto;
-        gap: 8px;
-      }
-
-      .date {
-        font-size: 14px;
-      }
-
-      .backup-panel {
-        padding: 10px;
-      }
-
-      .field textarea.compact-textarea {
-        min-height: 68px;
-      }
-    }
-
-
-    /* v10 requested refinements */
-    body.fixed-screen {
-      padding-top: calc(var(--top-height) + 22px);
-    }
-
-    body.fixed-screen .top-inner {
-      min-height: 0;
-      display: block;
-      align-items: initial;
-    }
-
-    body.fixed-screen .header-topbar {
-      margin-bottom: 12px;
-    }
-
-    .list,
-    .fixed-cost-group {
-      box-shadow: none !important;
-    }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:first-child,
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:last-child {
-      color: inherit;
-      font-weight: 800;
-    }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:first-child {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:last-child {
-      font-size: 26px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .category-chip-area {
-      display: grid;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .category-chip-title {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .category-chip-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .category-chip {
-      border: 1px solid rgba(37, 99, 235, .22);
-      border-radius: 999px;
-      background: rgba(239, 246, 255, .78);
-      color: #1d4ed8;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: none;
-    }
-
-    .category-chip:active {
-      transform: translateY(1px);
-    }
-
-
-    /* v11 requested refinements */
-    :root {
-      --top-gap-extra: 26px;
-      --footer-gap-bottom: 18px;
-    }
-
-    body,
-    body.fixed-screen {
-      padding-top: calc(var(--top-height) + var(--top-gap-extra));
-    }
-
-    .top-balance {
-      padding-top: 18px;
-      padding-bottom: 18px;
-    }
-
-    .main {
-      padding-top: 8px;
-    }
-
-    .screen {
-      padding-top: 2px;
-    }
-
-    .screen-badge::after,
-    body.fixed-screen .screen-badge::after {
-      content: none !important;
-      display: none !important;
-    }
-
-    .bottom-summary,
-    .fixed-bottom-summary {
-      padding-bottom: var(--footer-gap-bottom);
-    }
-
-    .fixed-bottom-summary {
-      border-top: 0 !important;
-    }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:first-child {
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    body.fixed-screen .fixed-bottom-summary .summary-line.total span:last-child {
-      color: var(--accent-dark) !important;
-      font-size: 26px;
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .transaction-row {
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 8px;
-      align-items: center;
-      padding: 0 10px 0 0;
-      cursor: default;
-    }
-
-    .transaction-info {
-      min-width: 0;
-      display: grid;
-      grid-template-columns: 54px minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      padding: 14px;
-    }
-
-    .transaction-edit-button.mini-button {
-      min-width: auto;
-      display: inline-flex;
-      grid-template-columns: none;
-      align-items: center;
-      justify-content: center;
-      padding: 7px 10px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .transaction-delete-button {
-      margin-right: 0;
-    }
-
-    .type-option::before,
-    .type-option.selected-income::before,
-    .type-option.selected-expense::before {
-      content: none !important;
-      display: none !important;
-    }
-
-    .restore-field-hint {
-      margin: 0 0 7px;
-      font-size: 12px;
-      line-height: 1.55;
-    }
-
-    @media (max-width: 420px) {
+    @media (max-width: 540px) {
       :root {
-        --top-gap-extra: 28px;
-        --footer-gap-bottom: 18px;
+        --inner-width: calc(100vw - 32px);
+        --floating-gap: 8px;
       }
 
-      body.fixed-screen {
-        --top-height: 122px;
+      .screen-title {
+        font-size: clamp(26px, 7.2vw, 32px);
       }
 
-      .top-balance {
-        padding-top: 18px;
-        padding-bottom: 18px;
+      .data-button {
+        padding: 8px 11px;
+        font-size: 12px;
       }
 
-      .main {
-        padding-top: 10px;
+      .editable-balance {
+        min-height: 62px;
+        padding: 10px 14px;
+      }
+
+      .editable-balance::after {
+        padding: 7px 10px;
+        font-size: 12px;
       }
 
       .transaction-row {
@@ -1611,50 +831,113 @@
       }
 
       .transaction-info {
-        grid-template-columns: 44px minmax(0, 1fr) auto;
-        gap: 7px;
-        padding: 13px 8px 13px 10px;
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        gap: 2px;
+        padding: 13px 2px 13px 10px;
       }
 
-      .transaction-info .amount {
+      .date,
+      .name,
+      .amount,
+      .fixed-cost-name,
+      .fixed-cost-amount {
         font-size: 14px;
       }
 
-      .transaction-edit-button.mini-button,
-      .transaction-delete-button.mini-danger-button {
-        padding: 7px 8px;
+      .mini-button,
+      .mini-danger-button {
+        padding: 8px 9px;
         font-size: 12px;
+      }
+
+      .fixed-cost-group-head {
+        align-items: center;
+      }
+
+      .fixed-cost-head-actions {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .fixed-cost-item {
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        padding: 13px 10px 13px 12px;
+      }
+
+      .summary-line span:last-child {
+        font-size: 21px;
+      }
+
+      .summary-line.total span:last-child,
+      .fixed-bottom-summary .summary-line.total span:last-child {
+        font-size: 31px;
+      }
+
+      .floating-actions {
+        left: calc(12px + env(safe-area-inset-left));
+        right: calc(12px + env(safe-area-inset-right));
+        bottom: calc(var(--footer-h) + 20px);
+      }
+
+      .floating-nav,
+      .floating-clear,
+      .floating-add {
+        min-height: 50px;
+        padding: 0 14px;
+        font-size: 14px;
       }
     }
 
+    @media (max-width: 380px) {
+      :root {
+        --inner-width: calc(100vw - 28px);
+        --floating-gap: 7px;
+      }
 
+      .screen-title {
+        font-size: 25px;
+      }
+
+      .data-button {
+        padding: 7px 9px;
+        font-size: 11.5px;
+      }
+
+      .floating-actions {
+        left: calc(10px + env(safe-area-inset-left));
+        right: calc(10px + env(safe-area-inset-right));
+      }
+
+      .floating-nav,
+      .floating-clear,
+      .floating-add {
+        padding: 0 11px;
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="top-balance">
     <div class="top-inner">
       <div class="header-topbar">
-        <div id="screenTitleBadge" class="screen-badge" aria-live="polite">収支管理簿</div>
-        <div class="data-management" aria-label="データ管理">
-          <button id="dataButton" class="ghost-button subtle-button" type="button">データバックアップ・復元</button>
-        </div>
+        <h1 id="screenTitle" class="screen-title">収支管理簿</h1>
+        <button id="dataButton" class="data-button" type="button">データバックアップ・復元</button>
       </div>
       <div id="balanceArea" class="balance-area">
         <div class="label">現在の預金残高</div>
-        <div class="balance-row">
-          <button id="currentBalance" class="balance-amount editable-balance" type="button" aria-label="現在の預金残高を編集">¥0</button>
-        </div>
+        <button id="currentBalance" class="editable-balance" type="button" aria-label="現在の預金残高を編集">¥0</button>
       </div>
     </div>
   </header>
 
   <main class="main">
     <div id="screenSlider" class="screen-slider">
-      <section id="mainScreen" class="screen">
+      <section id="mainScreen" class="screen" aria-label="収支管理簿">
         <div id="transactionList" class="list"></div>
       </section>
-
-      <section id="fixedCostScreen" class="screen">
+      <section id="fixedCostScreen" class="screen" aria-label="固定費管理簿">
         <div id="fixedCostContent"></div>
       </section>
     </div>
@@ -1662,11 +945,12 @@
 
   <div class="floating-actions" aria-label="画面操作">
     <button id="screenSwitchButton" class="floating-nav" type="button">固定費管理簿へ</button>
+    <div class="floating-spacer" aria-hidden="true"></div>
     <button id="clearTransactionsButton" class="floating-clear" type="button">入力クリア</button>
-    <button id="addButton" class="floating-add" type="button">＋ 予定を追加</button>
+    <button id="addButton" class="floating-add" type="button">＋ 予定追加</button>
   </div>
 
-  <footer class="bottom-summary">
+  <footer class="bottom-summary" aria-label="収支集計">
     <div class="bottom-inner summary-grid">
       <div class="summary-line">
         <span>収入合計</span>
@@ -1695,7 +979,7 @@
   <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
-        <h2 id="modalTitle" class="modal-title">予定を追加</h2>
+        <h2 id="modalTitle" class="modal-title">入力</h2>
       </div>
       <div id="modalBody"></div>
     </div>
@@ -1705,44 +989,42 @@
 
   <script>
     const STORAGE_KEY = "simple-household-book-main-v1";
-    const EXPORT_PREFIX_COMPRESSED = "SHB1.";
-    const EXPORT_PREFIX_PLAIN = "SHB0.";
+    const EXPORT_PREFIX_COMPRESSED = "S2.";
+    const EXPORT_PREFIX_PLAIN = "S2P.";
 
     const defaultFixedCosts = [
-      { id: crypto.randomUUID(), category: "口座振替", name: "口座振替", amount: 50000 },
-      { id: crypto.randomUUID(), category: "カード", name: "カード", amount: 30000 }
+      { id: newId(), category: "クレジット", name: "スマホ代", amount: 7764 },
+      { id: newId(), category: "クレジット", name: "NISA", amount: 10000 },
+      { id: newId(), category: "クレジット", name: "生活費(B43)", amount: 34000 },
+      { id: newId(), category: "口座振替", name: "家賃", amount: 55650 },
+      { id: newId(), category: "口座振替", name: "車ローン", amount: 25000 },
+      { id: newId(), category: "口座振替", name: "学資保険", amount: 5661 }
     ];
 
     const defaultData = {
       currentBalance: 0,
-      fixedCategories: ["口座振替", "カード"],
-      fixedCosts: structuredClone(defaultFixedCosts),
-      transactions: [
-        { id: crypto.randomUUID(), date: "2026-06-15", type: "income", name: "給与", category: "", amount: 300000 },
-        { id: crypto.randomUUID(), date: "2026-06-26", type: "expense", name: "口座振替", category: "", amount: -50000 },
-        { id: crypto.randomUUID(), date: "2026-06-26", type: "expense", name: "カード", category: "", amount: -30000 }
-      ]
+      fixedCategories: ["クレジット", "口座振替"],
+      fixedCosts: clone(defaultFixedCosts),
+      transactions: []
     };
 
     let data = loadData();
 
     const state = {
-      draft: null,
       screen: "main",
       previousFocus: null,
       toastTimer: null
     };
 
     const elements = {
-      currentBalance: document.getElementById("currentBalance"),
-      screenTitleBadge: document.getElementById("screenTitleBadge"),
-      screenSwitchButton: document.getElementById("screenSwitchButton"),
+      screenTitle: document.getElementById("screenTitle"),
       dataButton: document.getElementById("dataButton"),
-      screenSlider: document.getElementById("screenSlider"),
+      currentBalance: document.getElementById("currentBalance"),
       mainScreen: document.getElementById("mainScreen"),
       fixedCostScreen: document.getElementById("fixedCostScreen"),
-      fixedCostContent: document.getElementById("fixedCostContent"),
       transactionList: document.getElementById("transactionList"),
+      fixedCostContent: document.getElementById("fixedCostContent"),
+      screenSwitchButton: document.getElementById("screenSwitchButton"),
       clearTransactionsButton: document.getElementById("clearTransactionsButton"),
       addButton: document.getElementById("addButton"),
       incomeTotal: document.getElementById("incomeTotal"),
@@ -1756,48 +1038,79 @@
     };
 
     elements.addButton.addEventListener("click", () => {
-      if (state.screen === "fixed") openFixedCostAddModal();
-      else startAddFlow();
+      if (state.screen === "fixed") openFixedCostModal({ mode: "add" });
+      else openTransactionModal({ mode: "add" });
     });
     elements.clearTransactionsButton.addEventListener("click", clearTransactions);
     elements.transactionList.addEventListener("click", handleTransactionListClick);
     elements.currentBalance.addEventListener("click", openBalanceEditor);
     elements.screenSwitchButton.addEventListener("click", toggleScreen);
     elements.dataButton.addEventListener("click", openDataModal);
-    elements.modalBackdrop.addEventListener("click", (event) => {
+    elements.modalBackdrop.addEventListener("click", event => {
       if (event.target === elements.modalBackdrop) closeModal();
     });
     document.addEventListener("keydown", handleDocumentKeydown);
+    window.addEventListener("resize", syncLayoutInsets);
 
+    setupLayoutObservers();
     render();
+    syncLayoutInsets();
+
+    function newId() {
+      if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
+      return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function setupLayoutObservers() {
+      if (!("ResizeObserver" in window)) return;
+      const observer = new ResizeObserver(syncLayoutInsets);
+      [".top-balance", ".bottom-summary", ".fixed-bottom-summary"].forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) observer.observe(element);
+      });
+    }
+
+    function syncLayoutInsets() {
+      const header = document.querySelector(".top-balance");
+      const footer = state.screen === "fixed"
+        ? document.querySelector(".fixed-bottom-summary")
+        : document.querySelector(".bottom-summary");
+
+      if (header) {
+        document.documentElement.style.setProperty("--header-h", `${Math.ceil(header.getBoundingClientRect().height)}px`);
+      }
+      if (footer) {
+        document.documentElement.style.setProperty("--footer-h", `${Math.ceil(footer.getBoundingClientRect().height)}px`);
+      }
+    }
 
     function loadData() {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(defaultData);
+      if (!raw) return clone(defaultData);
 
       try {
         return normalizeData(JSON.parse(raw));
       } catch {
-        return structuredClone(defaultData);
+        return clone(defaultData);
       }
     }
 
     function normalizeData(input) {
-      if (!input || !Array.isArray(input.transactions)) throw new Error("invalid transactions");
-      if (typeof input.currentBalance !== "number") throw new Error("invalid balance");
+      if (!input || typeof input.currentBalance !== "number" || !Array.isArray(input.transactions)) {
+        throw new Error("invalid data");
+      }
 
       const fixedCostSource = Array.isArray(input.fixedCosts) ? input.fixedCosts : defaultFixedCosts;
       const fixedCosts = fixedCostSource.map(item => ({
-        id: item.id || crypto.randomUUID(),
+        id: item.id || newId(),
         category: String(item.category || "").trim(),
         name: String(item.name || "").trim(),
         amount: Math.trunc(Number(item.amount))
-      })).filter(item =>
-        item.category &&
-        item.name &&
-        Number.isFinite(item.amount) &&
-        item.amount > 0
-      );
+      })).filter(item => item.category && item.name && Number.isFinite(item.amount) && item.amount > 0);
 
       const categorySource = Array.isArray(input.fixedCategories)
         ? input.fixedCategories
@@ -1808,23 +1121,25 @@
         ...fixedCosts.map(item => item.category)
       ]);
 
+      const transactions = input.transactions.map(item => ({
+        id: item.id || newId(),
+        date: String(item.date),
+        type: item.type,
+        name: String(item.name || "").trim(),
+        category: String(item.category || "").trim(),
+        amount: Math.trunc(Number(item.amount))
+      })).filter(item =>
+        /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+        (item.type === "income" || item.type === "expense") &&
+        item.name &&
+        Number.isFinite(item.amount)
+      );
+
       return {
         currentBalance: Math.trunc(input.currentBalance),
         fixedCategories,
         fixedCosts,
-        transactions: input.transactions.map(item => ({
-          id: item.id || crypto.randomUUID(),
-          date: String(item.date),
-          type: item.type,
-          name: String(item.name),
-          category: item.category ? String(item.category) : "",
-          amount: Math.trunc(Number(item.amount))
-        })).filter(item =>
-          /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
-          (item.type === "income" || item.type === "expense") &&
-          item.name &&
-          Number.isFinite(item.amount)
-        )
+        transactions
       };
     }
 
@@ -1840,22 +1155,19 @@
     }
 
     function renderHeaderAndSummary() {
-      const transactions = visibleTransactions();
-      const totals = transactionTotals(transactions);
-      const finalBalance = data.currentBalance + totals.income + totals.expense;
-
+      const totals = transactionTotals(data.transactions);
       elements.currentBalance.textContent = formatYen(data.currentBalance);
       setMoneyText(elements.incomeTotal, totals.income);
       setMoneyText(elements.expenseTotal, totals.expense);
-      setMoneyText(elements.finalBalance, finalBalance);
+      setMoneyText(elements.finalBalance, data.currentBalance + totals.income + totals.expense);
+      elements.fixedCostTotalFooter.textContent = formatYen(fixedCostTotal());
     }
 
     function renderTransactionList() {
-      const transactions = visibleTransactions();
-
-      if (transactions.length === 0) {
+      const transactions = sortedTransactions(data.transactions);
+      if (!transactions.length) {
         elements.transactionList.className = "empty";
-        elements.transactionList.innerHTML = "予定がありません";
+        elements.transactionList.innerHTML = "予定がありません。<br>右下の「＋ 予定追加」から登録してください。";
         return;
       }
 
@@ -1869,31 +1181,16 @@
               <div class="name">${escapeHtml(item.name)}</div>
               <div class="amount ${amountClass}">${formatSignedYen(item.amount)}</div>
             </div>
-            <button class="mini-button transaction-edit-button" type="button" data-edit-transaction-id="${escapeHtml(item.id)}">変更</button>
-            <button class="mini-danger-button transaction-delete-button" type="button" data-delete-transaction-id="${escapeHtml(item.id)}">削除</button>
+            <button class="mini-button" type="button" data-edit-transaction-id="${escapeHtml(item.id)}">変更</button>
+            <button class="mini-danger-button" type="button" data-delete-transaction-id="${escapeHtml(item.id)}">削除</button>
           </div>
         `;
       }).join("");
     }
 
-    async function handleTransactionListClick(event) {
-      const deleteButton = event.target.closest("[data-delete-transaction-id]");
-      if (deleteButton) {
-        await deleteTransaction(deleteButton.dataset.deleteTransactionId);
-        return;
-      }
-
-      const editButton = event.target.closest("[data-edit-transaction-id]");
-      if (editButton) {
-        openEditModal(editButton.dataset.editTransactionId);
-      }
-    }
-
     function renderFixedCostScreen() {
       const groups = fixedCostGroups();
-      const total = fixedCostTotal();
-      elements.fixedCostTotalFooter.textContent = formatYen(total);
-      const fixedList = groups.map(group => `
+      const listHtml = groups.map(group => `
         <div class="fixed-cost-group">
           <div class="fixed-cost-group-head">
             <div class="fixed-cost-head-title">${escapeHtml(group.category)}<small>${group.items.length}件</small></div>
@@ -1915,20 +1212,44 @@
 
       elements.fixedCostContent.innerHTML = `
         <div class="fixed-cost-list">
-          ${fixedList || '<div class="empty-mini">固定費カテゴリがありません。右下の「＋ 固定費を追加」から登録してください。</div>'}
+          ${listHtml || '<div class="empty-mini">固定費カテゴリがありません。<br>右下の「＋ 固定費追加」から登録してください。</div>'}
         </div>
       `;
-
-      elements.fixedCostContent.querySelectorAll("[data-edit-fixed-cost-id]").forEach(button => {
-        button.addEventListener("click", () => openFixedCostEditor(button.dataset.editFixedCostId));
-      });
-      elements.fixedCostContent.querySelectorAll("[data-delete-fixed-cost-id]").forEach(button => {
-        button.addEventListener("click", () => deleteFixedCost(button.dataset.deleteFixedCostId));
-      });
-      elements.fixedCostContent.querySelectorAll("[data-delete-fixed-category]").forEach(button => {
-        button.addEventListener("click", () => deleteFixedCategory(button.dataset.deleteFixedCategory));
-      });
     }
+
+    function handleTransactionListClick(event) {
+      const deleteButton = event.target.closest("[data-delete-transaction-id]");
+      if (deleteButton) {
+        deleteTransaction(deleteButton.dataset.deleteTransactionId);
+        return;
+      }
+
+      const editButton = event.target.closest("[data-edit-transaction-id]");
+      if (editButton) {
+        const item = data.transactions.find(tx => tx.id === editButton.dataset.editTransactionId);
+        if (item) openTransactionModal({ mode: "edit", item });
+      }
+    }
+
+    elements.fixedCostContent.addEventListener("click", event => {
+      const editButton = event.target.closest("[data-edit-fixed-cost-id]");
+      if (editButton) {
+        const item = data.fixedCosts.find(cost => cost.id === editButton.dataset.editFixedCostId);
+        if (item) openFixedCostModal({ mode: "edit", item });
+        return;
+      }
+
+      const deleteButton = event.target.closest("[data-delete-fixed-cost-id]");
+      if (deleteButton) {
+        deleteFixedCost(deleteButton.dataset.deleteFixedCostId);
+        return;
+      }
+
+      const categoryButton = event.target.closest("[data-delete-fixed-category]");
+      if (categoryButton) {
+        deleteFixedCategory(categoryButton.dataset.deleteFixedCategory);
+      }
+    });
 
     function toggleScreen() {
       state.screen = state.screen === "main" ? "fixed" : "main";
@@ -1940,10 +1261,11 @@
       document.body.classList.toggle("fixed-screen", fixed);
       elements.mainScreen.setAttribute("aria-hidden", String(fixed));
       elements.fixedCostScreen.setAttribute("aria-hidden", String(!fixed));
-      elements.screenTitleBadge.textContent = fixed ? "固定費管理簿" : "収支管理簿";
+      elements.screenTitle.textContent = fixed ? "固定費管理簿" : "収支管理簿";
       elements.screenSwitchButton.textContent = fixed ? "収支管理簿へ" : "固定費管理簿へ";
-      elements.addButton.textContent = fixed ? "＋ 固定費を追加" : "＋ 予定を追加";
+      elements.addButton.textContent = fixed ? "＋ 固定費追加" : "＋ 予定追加";
       elements.clearTransactionsButton.hidden = fixed;
+      requestAnimationFrame(syncLayoutInsets);
     }
 
     function sortedTransactions(transactions) {
@@ -1953,18 +1275,13 @@
       });
     }
 
-    function visibleTransactions() {
-      return sortedTransactions(data.transactions);
-    }
-
     function transactionTotals(transactions) {
       return transactions.reduce((totals, item) => {
         if (item.amount > 0) totals.income += item.amount;
-        else if (item.amount < 0) totals.expense += item.amount;
+        if (item.amount < 0) totals.expense += item.amount;
         return totals;
       }, { income: 0, expense: 0 });
     }
-
 
     function sortedFixedCategories() {
       return [...data.fixedCategories].sort((a, b) => a.localeCompare(b, "ja"));
@@ -2009,35 +1326,35 @@
       else element.classList.add("money-zero");
     }
 
-    function moneyClass(value) {
-      if (value > 0) return "money-positive";
-      if (value < 0) return "money-negative";
-      return "money-zero";
-    }
-
-    function amountHtml(value) {
-      return `<strong class="${moneyClass(value)}">${formatSignedYen(value)}</strong>`;
-    }
-
-
-    function startAddFlow() {
-      openTransactionModal({ mode: "add" });
-    }
-
-    function openEditModal(id) {
-      const item = data.transactions.find(tx => tx.id === id);
-      if (!item) return;
-      openTransactionModal({ mode: "edit", item });
-    }
-
-    function transactionFormHtml({ mode, item }) {
+    function openTransactionModal({ mode, item = null }) {
       const isEdit = mode === "edit";
-      const dateValue = isEdit ? item.date : todayAsInputValue();
-      const nameValue = isEdit ? item.name : "";
-      const amountValue = isEdit ? Math.abs(item.amount) : "";
-      const typeValue = isEdit ? item.type : "income";
-      const groups = fixedCostGroups({ includeEmpty: false });
-      const fixedButtons = groups.map(group => `
+      const values = {
+        date: isEdit ? item.date : todayAsInputValue(),
+        type: isEdit ? item.type : "income",
+        name: isEdit ? item.name : "",
+        amount: isEdit ? Math.abs(item.amount) : ""
+      };
+
+      openModal(isEdit ? "予定変更" : "予定追加", transactionFormHtml(values), "center");
+      setupTransactionForm(values.type);
+      setupMoneyInput("transactionAmountInput");
+
+      document.getElementById("cancelButton").addEventListener("click", closeModal);
+      document.getElementById("saveButton").addEventListener("click", () => {
+        const formValues = readTransactionForm();
+        if (!formValues) return;
+
+        if (isEdit) Object.assign(item, formValues);
+        else data.transactions.push({ id: newId(), ...formValues });
+
+        saveData();
+        closeModal();
+        render();
+      });
+    }
+
+    function transactionFormHtml(values) {
+      const fixedButtons = fixedCostGroups({ includeEmpty: false }).map(group => `
         <button class="choice-button" type="button" data-quick-fixed-category="${escapeHtml(group.category)}" data-quick-fixed-amount="${group.subtotal}">
           <span>${escapeHtml(group.category)}</span>
           <span class="choice-sub">${formatYen(group.subtotal)}</span>
@@ -2047,26 +1364,26 @@
       return `
         <div class="field">
           <label for="transactionDateInput">月日</label>
-          <input id="transactionDateInput" type="date" value="${escapeHtml(dateValue)}">
+          <input id="transactionDateInput" type="date" value="${escapeHtml(values.date)}">
         </div>
         <div class="field">
           <label>収入/支出</label>
           <div class="type-toggle" role="group" aria-label="収入または支出を選択">
-            <button class="type-option" type="button" data-type-option="income" aria-pressed="${typeValue === "income" ? "true" : "false"}">収入</button>
-            <button class="type-option" type="button" data-type-option="expense" aria-pressed="${typeValue === "expense" ? "true" : "false"}">支出</button>
+            <button class="type-option" type="button" data-type-option="income">収入</button>
+            <button class="type-option" type="button" data-type-option="expense">支出</button>
           </div>
         </div>
         <div id="fixedQuickArea" class="choice-grid fixed-quick-area" hidden>
-          <p class="hint">固定費カテゴリを選ぶと、名称と合計金額を自動入力します。</p>
+          <p class="hint">固定費カテゴリを選ぶと、<br>名称と合計金額を自動入力します。</p>
           ${fixedButtons || '<div class="empty-mini">固定費カテゴリが未登録です。</div>'}
         </div>
         <div class="field">
           <label for="transactionNameInput">名称</label>
-          <input id="transactionNameInput" type="text" value="${escapeHtml(nameValue)}">
+          <input id="transactionNameInput" type="text" value="${escapeHtml(values.name)}">
         </div>
         <div class="field">
           <label for="transactionAmountInput">金額</label>
-          <input id="transactionAmountInput" type="number" inputmode="numeric" min="0" value="${escapeHtml(amountValue)}">
+          <input id="transactionAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -2075,71 +1392,39 @@
       `;
     }
 
-    function openTransactionModal({ mode, item = null }) {
-      const title = mode === "edit" ? "予定を編集" : "予定を追加";
-      openModal(title, transactionFormHtml({ mode, item }), "center");
+    function setupTransactionForm(initialType) {
+      setTransactionType(initialType);
 
-      let selectedType = item ? item.type : "income";
-      const quickArea = document.getElementById("fixedQuickArea");
-      const nameInput = document.getElementById("transactionNameInput");
-      const amountInput = document.getElementById("transactionAmountInput");
-      const typeButtons = [...document.querySelectorAll("[data-type-option]")];
-
-      const syncType = () => {
-        setTypeToggleState(typeButtons, selectedType);
-        quickArea.hidden = selectedType !== "expense";
-        setModalTone(selectedType);
-      };
-
-      typeButtons.forEach(button => {
-        button.addEventListener("click", () => {
-          selectedType = button.dataset.typeOption;
-          syncType();
-        });
+      document.querySelectorAll("[data-type-option]").forEach(button => {
+        button.addEventListener("click", () => setTransactionType(button.dataset.typeOption));
       });
 
       document.querySelectorAll("[data-quick-fixed-category]").forEach(button => {
         button.addEventListener("click", () => {
-          selectedType = "expense";
-          nameInput.value = button.dataset.quickFixedCategory;
-          amountInput.value = button.dataset.quickFixedAmount;
-          syncType();
+          setTransactionType("expense");
+          document.getElementById("transactionNameInput").value = button.dataset.quickFixedCategory;
+          document.getElementById("transactionAmountInput").value = formatYenInput(button.dataset.quickFixedAmount);
         });
       });
-
-      syncType();
-
-      document.getElementById("saveButton").addEventListener("click", () => {
-        const values = readTransactionForm(selectedType);
-        if (!values) return;
-
-        if (mode === "edit" && item) {
-          item.date = values.date;
-          item.type = values.type;
-          item.name = values.name;
-          item.category = "";
-          item.amount = values.amount;
-        } else {
-          data.transactions.push({
-            id: crypto.randomUUID(),
-            date: values.date,
-            type: values.type,
-            name: values.name,
-            category: "",
-            amount: values.amount
-          });
-        }
-
-        saveData();
-        closeModal();
-        state.screen = "main";
-        render();
-      });
-
-      document.getElementById("cancelButton").addEventListener("click", closeModal);
     }
 
-    function readTransactionForm(selectedType) {
+    function setTransactionType(type) {
+      const normalized = type === "expense" ? "expense" : "income";
+      document.querySelectorAll("[data-type-option]").forEach(button => {
+        const selected = button.dataset.typeOption === normalized;
+        button.classList.toggle(`selected-${button.dataset.typeOption}`, selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+
+      const fixedArea = document.getElementById("fixedQuickArea");
+      if (fixedArea) fixedArea.hidden = normalized !== "expense";
+
+      elements.modalBackdrop.classList.toggle("tone-income", normalized === "income");
+      elements.modalBackdrop.classList.toggle("tone-expense", normalized === "expense");
+    }
+
+    function readTransactionForm() {
+      const type = document.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
       const date = document.getElementById("transactionDateInput").value;
       const name = document.getElementById("transactionNameInput").value.trim();
       const amount = readPositiveAmount("transactionAmountInput");
@@ -2156,24 +1441,11 @@
 
       return {
         date,
-        type: selectedType,
+        type,
         name,
-        amount: selectedType === "income" ? amount : -amount
+        category: "",
+        amount: type === "income" ? amount : -amount
       };
-    }
-
-    function setTypeToggleState(buttons, selectedType) {
-      buttons.forEach(button => {
-        const selected = button.dataset.typeOption === selectedType;
-        button.classList.toggle("selected-income", selected && selectedType === "income");
-        button.classList.toggle("selected-expense", selected && selectedType === "expense");
-        button.setAttribute("aria-pressed", String(selected));
-      });
-    }
-
-    function setModalTone(type) {
-      elements.modalBackdrop.classList.toggle("tone-income", type === "income");
-      elements.modalBackdrop.classList.toggle("tone-expense", type === "expense");
     }
 
     async function deleteTransaction(id) {
@@ -2181,8 +1453,8 @@
       if (!item) return;
 
       const ok = await showConfirm({
-        title: "予定を削除",
-        message: `${item.name} ${formatSignedYen(item.amount)} を削除しますか？`,
+        title: "予定削除",
+        message: `予定「${item.name}」を削除します。\nこの操作は元に戻せません。`,
         danger: true
       });
       if (!ok) return;
@@ -2190,20 +1462,18 @@
       data.transactions = data.transactions.filter(tx => tx.id !== id);
       saveData();
       render();
-      showToast("予定を削除しました。");
     }
 
     async function clearTransactions() {
-      if (data.transactions.length === 0) {
-        showToast("クリアする予定がありません。");
+      if (!data.transactions.length) {
+        showToast("削除する予定がありません。");
         return;
       }
 
       const ok = await showConfirm({
-        title: "入力一覧をクリア",
-        message: `収支管理簿画面の予定 ${data.transactions.length}件を削除します。
-現在の預金残高と固定費管理簿のデータは削除されません。`,
-        confirmText: "クリアする",
+        title: "入力クリア",
+        message: `収支管理簿画面の予定 ${data.transactions.length}件を削除します。\n現在の預金残高と固定費管理簿のデータは削除されません。`,
+        confirmText: "削除",
         danger: true
       });
       if (!ok) return;
@@ -2211,29 +1481,29 @@
       data.transactions = [];
       saveData();
       render();
-      showToast("入力一覧をクリアしました。");
     }
 
     function openBalanceEditor() {
       openModal("現在の預金残高", `
         <div class="field">
           <label for="balanceInput">現在の預金残高</label>
-          <input id="balanceInput" type="number" inputmode="numeric" value="${data.currentBalance}">
+          <input id="balanceInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(data.currentBalance))}" placeholder="¥ -">
         </div>
         <div class="actions">
-          <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
           <button class="primary-button" type="button" id="saveButton">保存</button>
+          <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
         </div>
-      `, "center");
+      `);
+
+      setupMoneyInput("balanceInput");
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
-        const value = Number(document.getElementById("balanceInput").value);
+        const value = parseYenInput(document.getElementById("balanceInput").value);
         if (!Number.isFinite(value)) {
           showToast("残高を入力してください。");
           return;
         }
-
         data.currentBalance = Math.trunc(value);
         saveData();
         closeModal();
@@ -2241,47 +1511,46 @@
       });
     }
 
-    function openFixedCostAddModal() {
-      openModal("固定費を追加", fixedCostFormHtml({
-        category: "",
-        name: "",
-        amount: ""
-      }), "center");
-      bindFixedCategoryChips();
+    function openFixedCostModal({ mode, item = null }) {
+      const isEdit = mode === "edit";
+      const values = {
+        category: isEdit ? item.category : "",
+        name: isEdit ? item.name : "",
+        amount: isEdit ? item.amount : ""
+      };
 
+      openModal(isEdit ? "固定費変更" : "固定費追加", fixedCostFormHtml(values));
+      setupFixedCostForm();
+      setupMoneyInput("fixedAmountInput");
+
+      document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
-        const values = readFixedCostForm();
-        if (!values) return;
+        const formValues = readFixedCostForm();
+        if (!formValues) return;
 
-        ensureFixedCategory(values.category);
-        data.fixedCosts.push({
-          id: crypto.randomUUID(),
-          category: values.category,
-          name: values.name,
-          amount: values.amount
-        });
+        ensureFixedCategory(formValues.category);
+        if (isEdit) Object.assign(item, formValues);
+        else data.fixedCosts.push({ id: newId(), ...formValues });
+
         saveData();
         closeModal();
         render();
       });
-      document.getElementById("cancelButton").addEventListener("click", closeModal);
     }
 
     function fixedCostFormHtml(values) {
-      const categoryButtons = sortedFixedCategories()
-        .map(category => `
-          <button class="category-chip" type="button" data-fill-fixed-category="${escapeHtml(category)}">${escapeHtml(category)}</button>
-        `)
-        .join("");
+      const categoryChips = sortedFixedCategories().map(category => `
+        <button class="category-chip" type="button" data-fill-fixed-category="${escapeHtml(category)}">${escapeHtml(category)}</button>
+      `).join("");
 
       return `
         <div class="field">
           <label for="fixedCategoryInput">カテゴリ</label>
           <input id="fixedCategoryInput" type="text" value="${escapeHtml(values.category)}">
-          ${categoryButtons ? `
-            <div class="category-chip-area" aria-label="既存カテゴリ">
-              <div class="category-chip-title">既存カテゴリ</div>
-              <div class="category-chip-list">${categoryButtons}</div>
+          ${categoryChips ? `
+            <div class="category-chip-area">
+              <div class="chip-title">既存カテゴリ</div>
+              <div class="category-chip-list">${categoryChips}</div>
             </div>
           ` : ""}
         </div>
@@ -2291,7 +1560,7 @@
         </div>
         <div class="field">
           <label for="fixedAmountInput">金額</label>
-          <input id="fixedAmountInput" type="number" inputmode="numeric" min="0" value="${escapeHtml(values.amount)}">
+          <input id="fixedAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -2300,17 +1569,12 @@
       `;
     }
 
-    function bindFixedCategoryChips() {
-      const categoryInput = document.getElementById("fixedCategoryInput");
-      if (!categoryInput) return;
-
+    function setupFixedCostForm() {
       document.querySelectorAll("[data-fill-fixed-category]").forEach(button => {
         button.addEventListener("click", () => {
-          categoryInput.value = button.dataset.fillFixedCategory;
-          if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-          }
-          button.focus({ preventScroll: true });
+          if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+          document.getElementById("fixedCategoryInput").value = button.dataset.fillFixedCategory;
+          button.blur();
         });
       });
     }
@@ -2333,41 +1597,13 @@
       return { category, name, amount };
     }
 
-    function openFixedCostEditor(id) {
-      const item = data.fixedCosts.find(cost => cost.id === id);
-      if (!item) return;
-
-      openModal("固定費を変更", fixedCostFormHtml({
-        category: item.category,
-        name: item.name,
-        amount: String(item.amount)
-      }), "center");
-      bindFixedCategoryChips();
-
-      document.getElementById("saveButton").addEventListener("click", () => {
-        const values = readFixedCostForm();
-        if (!values) return;
-
-        ensureFixedCategory(values.category);
-        item.category = values.category;
-        item.name = values.name;
-        item.amount = values.amount;
-        saveData();
-        closeModal();
-        render();
-      });
-      document.getElementById("cancelButton").addEventListener("click", closeModal);
-    }
-
     async function deleteFixedCost(id) {
       const item = data.fixedCosts.find(cost => cost.id === id);
       if (!item) return;
 
       const ok = await showConfirm({
-        title: "固定費明細を削除",
-        message: `${item.category} / ${item.name} ${formatYen(item.amount)} を削除しますか？
-
-※カテゴリ自体は残ります。`,
+        title: "固定費明細削除",
+        message: `固定費明細「${item.name}」を削除します。\nカテゴリ「${item.category}」は残ります。`,
         danger: true
       });
       if (!ok) return;
@@ -2379,15 +1615,10 @@
 
     async function deleteFixedCategory(category) {
       const count = data.fixedCosts.filter(cost => cost.category === category).length;
-      const message = count > 0
-        ? `${category} カテゴリを削除しますか？
-
-配下の固定費 ${count}件も一緒に削除されます。`
-        : `${category} カテゴリを削除しますか？`;
-
       const ok = await showConfirm({
-        title: "カテゴリを削除",
-        message,
+        title: "カテゴリ削除",
+        message: `カテゴリ「${category}」を削除します。\n配下の固定費明細 ${count}件も削除されます。`,
+        confirmText: "削除",
         danger: true
       });
       if (!ok) return;
@@ -2399,79 +1630,59 @@
     }
 
     function ensureFixedCategory(category) {
-      if (!data.fixedCategories.includes(category)) {
-        data.fixedCategories.push(category);
-      }
-    }
-
-    function uniqueStrings(values) {
-      return [...new Set(values.map(value => String(value || "").trim()).filter(Boolean))];
+      if (!data.fixedCategories.includes(category)) data.fixedCategories.push(category);
     }
 
     function openDataModal() {
       openModal("データバックアップ・復元", `
-        <p class="hint backup-lead">バックアップ文字列をコピーして保管します。<br>復元時は保存した文字列を貼り付けます。</p>
+        <p class="backup-lead">データを文字列として保存できます。<br>別端末への移行や復元に使えます。</p>
 
-        <div class="backup-panel">
-          <div class="backup-panel-head">
-            <strong>バックアップ</strong>
-            <span>予定・残高・固定費</span>
-          </div>
-          <button class="primary-button backup-wide-button" type="button" id="copyBackupButton">バックアップをコピー</button>
-          <div id="backupStatus" class="tiny-status"></div>
+        <div class="section-title">バックアップ</div>
+        <div class="actions">
+          <button class="primary-button" type="button" id="copyBackupButton">バックアップをコピー</button>
+        </div>
+        <div id="backupStatus" class="tiny-status" aria-live="polite"></div>
+        <div id="backupOutput" class="backup-output field">
+          <label for="backupText">バックアップ文字列</label>
+          <textarea id="backupText" readonly></textarea>
         </div>
 
-        <div class="backup-panel">
-          <div class="backup-panel-head">
-            <strong>復元</strong>
-            <span>現在のデータを上書き</span>
-          </div>
-          <div class="field compact-field">
-            <label for="importText">バックアップ文字列</label>
-            <p class="hint restore-field-hint">保存しておいたバックアップ文字列を貼り付けてください。読み込むと現在のデータは上書きされます。</p>
-            <textarea id="importText" class="compact-textarea"></textarea>
-          </div>
-          <div class="actions compact-actions">
-            <button class="secondary-button" type="button" id="pasteBackupButton">貼り付け</button>
-            <button class="danger-button" type="button" id="importButton">読み込む</button>
-          </div>
+        <div class="section-title">復元</div>
+        <p class="restore-field-hint">保存しておいたバックアップ文字列を貼り付けてください。</p>
+        <div class="field">
+          <label for="importText">バックアップ文字列</label>
+          <textarea id="importText" placeholder="ここにバックアップ文字列を貼り付け"></textarea>
         </div>
-
-        <div class="actions compact-actions">
+        <div class="actions">
+          <button class="secondary-button" type="button" id="pasteBackupButton">貼り付け</button>
+          <button class="danger-button" type="button" id="importButton">読み込む</button>
+        </div>
+        <div class="actions">
           <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
         </div>
       `);
 
       document.getElementById("copyBackupButton").addEventListener("click", async () => {
         const status = document.getElementById("backupStatus");
-        status.textContent = "バックアップ作成中...";
+        const output = document.getElementById("backupOutput");
+        const textarea = document.getElementById("backupText");
+        status.textContent = "バックアップ作成中です。";
         const text = await encodeExportString(data);
         const copied = await copyText(text);
-        if (copied) {
-          status.textContent = `コピーしました。${text.length}文字`;
-          showToast("バックアップをコピーしました。");
-          return;
-        }
-        status.innerHTML = `
-          <div class="copy-fallback-box">
-            <div>自動コピーできませんでした。下の文字列を手動でコピーしてください。</div>
-            <textarea readonly>${escapeHtml(text)}</textarea>
-          </div>
-        `;
-        const textarea = status.querySelector("textarea");
-        textarea.focus();
-        textarea.select();
+        textarea.value = text;
+        output.classList.toggle("open", !copied);
+        status.textContent = copied
+          ? `バックアップをコピーしました。予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件`
+          : "自動コピーできませんでした。下の文字列を長押ししてコピーしてください。";
       });
 
       document.getElementById("pasteBackupButton").addEventListener("click", async () => {
         const textarea = document.getElementById("importText");
-
         try {
           const text = await navigator.clipboard.readText();
           textarea.value = text.trim();
         } catch {
-          showToast("クリップボードを読み取れませんでした。手動で貼り付けてください。");
-          textarea.focus();
+          showToast("クリップボードから貼り付けできませんでした。手動で貼り付けてください。");
         }
       });
 
@@ -2485,19 +1696,17 @@
         let imported;
         try {
           imported = await decodeExportString(raw);
-        } catch (error) {
+        } catch {
           showToast("読み込みに失敗しました。バックアップ文字列が壊れている可能性があります。");
           return;
         }
 
-        const message =
-          `今のデータを、バックアップの内容で上書きしますか？\n\n` +
-          `現在：予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件 / カテゴリ ${data.fixedCategories.length}件 / 残高 ${formatYen(data.currentBalance)}\n` +
-          `バックアップ：予定 ${imported.transactions.length}件 / 固定費 ${imported.fixedCosts.length}件 / カテゴリ ${imported.fixedCategories.length}件 / 残高 ${formatYen(imported.currentBalance)}`;
-
         const ok = await showConfirm({
           title: "バックアップから読み込み",
-          message,
+          message:
+            `今のデータをバックアップ内容で上書きします。\n` +
+            `現在：予定 ${data.transactions.length}件 / 固定費 ${data.fixedCosts.length}件 / カテゴリ ${data.fixedCategories.length}件 / 残高 ${formatYen(data.currentBalance)}\n` +
+            `復元：予定 ${imported.transactions.length}件 / 固定費 ${imported.fixedCosts.length}件 / カテゴリ ${imported.fixedCategories.length}件 / 残高 ${formatYen(imported.currentBalance)}`,
           danger: true,
           confirmText: "読み込む"
         });
@@ -2545,62 +1754,72 @@
     }
 
     function packData(sourceData) {
+      const dictionary = [];
+      const dictionaryMap = new Map();
+      const textIndex = value => {
+        const text = String(value || "");
+        if (dictionaryMap.has(text)) return dictionaryMap.get(text);
+        const index = dictionary.length;
+        dictionary.push(text);
+        dictionaryMap.set(text, index);
+        return index;
+      };
+
       const transactions = sortedTransactions(sourceData.transactions).map(item => [
-        item.date.replaceAll("-", ""),
-        item.type === "income" ? 1 : 0,
-        item.name,
-        item.category || "",
+        Number(item.date.replaceAll("-", "")),
+        textIndex(item.name),
         item.amount
       ]);
 
-      const fixedCosts = [...sourceData.fixedCosts]
-        .sort((a, b) => {
-          if (a.category === b.category) return a.name.localeCompare(b.name, "ja");
-          return a.category.localeCompare(b.category, "ja");
-        })
-        .map(item => [item.category, item.name, item.amount]);
+      const fixedCosts = sortedFixedCosts().map(item => [
+        textIndex(item.category),
+        textIndex(item.name),
+        item.amount
+      ]);
 
-      const fixedCategories = uniqueStrings(sourceData.fixedCategories || fixedCosts.map(item => item[0]));
+      const fixedCategories = uniqueStrings(sourceData.fixedCategories || [])
+        .map(category => textIndex(category));
 
-      return [sourceData.currentBalance, transactions, fixedCosts, fixedCategories];
+      return [sourceData.currentBalance, dictionary, transactions, fixedCosts, fixedCategories];
     }
 
     function unpackData(packed) {
-      if (!Array.isArray(packed) || packed.length < 2 || !Array.isArray(packed[1])) {
+      if (!Array.isArray(packed) || packed.length !== 5 || !Array.isArray(packed[1]) || !Array.isArray(packed[2])) {
         throw new Error("invalid packed data");
       }
 
-      const transactions = packed[1].map(item => {
-        if (!Array.isArray(item) || item.length < 5) throw new Error("invalid transaction");
+      const dictionary = packed[1].map(value => String(value || ""));
+      const readText = index => {
+        const text = dictionary[Number(index)];
+        if (typeof text !== "string") throw new Error("invalid dictionary reference");
+        return text;
+      };
 
-        const dateText = String(item[0]);
-        const date = `${dateText.slice(0, 4)}-${dateText.slice(4, 6)}-${dateText.slice(6, 8)}`;
-        const type = item[1] === 1 ? "income" : "expense";
-        const amount = Math.trunc(Number(item[4]));
-
+      const transactions = packed[2].map(item => {
+        if (!Array.isArray(item) || item.length < 3) throw new Error("invalid transaction");
+        const dateText = String(item[0]).padStart(8, "0");
+        const amount = Math.trunc(Number(item[2]));
         return {
-          id: crypto.randomUUID(),
-          date,
-          type,
-          name: String(item[2]),
-          category: String(item[3] || ""),
+          id: newId(),
+          date: `${dateText.slice(0, 4)}-${dateText.slice(4, 6)}-${dateText.slice(6, 8)}`,
+          type: amount >= 0 ? "income" : "expense",
+          name: readText(item[1]),
+          category: "",
           amount
         };
       });
 
-      const fixedCosts = Array.isArray(packed[2]) ? packed[2].map(item => {
+      const fixedCosts = packed[3].map(item => {
         if (!Array.isArray(item) || item.length < 3) throw new Error("invalid fixed cost");
         return {
-          id: crypto.randomUUID(),
-          category: String(item[0] || ""),
-          name: String(item[1] || ""),
+          id: newId(),
+          category: readText(item[0]),
+          name: readText(item[1]),
           amount: Math.trunc(Number(item[2]))
         };
-      }) : structuredClone(defaultFixedCosts);
+      });
 
-      const fixedCategories = Array.isArray(packed[3])
-        ? packed[3].map(item => String(item || ""))
-        : fixedCosts.map(item => item.category);
+      const fixedCategories = packed[4].map(index => readText(index));
 
       return normalizeData({
         currentBalance: Math.trunc(Number(packed[0])),
@@ -2625,11 +1844,7 @@
     function bytesToBase64Url(bytes) {
       let binary = "";
       for (const byte of bytes) binary += String.fromCharCode(byte);
-
-      return btoa(binary)
-        .replaceAll("+", "-")
-        .replaceAll("/", "_")
-        .replaceAll("=", "");
+      return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
     }
 
     function base64UrlToBytes(text) {
@@ -2637,14 +1852,12 @@
         + "=".repeat((4 - text.length % 4) % 4);
       const binary = atob(base64);
       const bytes = new Uint8Array(binary.length);
-
       for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
       return bytes;
     }
 
     async function copyText(text) {
       if (!navigator.clipboard || !window.isSecureContext) return false;
-
       try {
         await navigator.clipboard.writeText(text);
         return true;
@@ -2657,10 +1870,8 @@
       state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       elements.modalTitle.textContent = title;
       elements.modalBody.innerHTML = bodyHtml;
-      elements.modalBackdrop.classList.remove("center", "tone-income", "tone-expense");
-      if (placement === "center") elements.modalBackdrop.classList.add("center");
+      elements.modalBackdrop.classList.remove("tone-income", "tone-expense");
       elements.modalBackdrop.classList.add("open");
-
       requestAnimationFrame(() => {
         const focusTarget = firstFocusableElement(elements.modalBackdrop) || elements.modalBackdrop;
         focusTarget.focus();
@@ -2668,27 +1879,20 @@
     }
 
     function closeModal({ restoreFocus = true } = {}) {
-      elements.modalBackdrop.classList.remove("open", "center", "tone-income", "tone-expense");
+      elements.modalBackdrop.classList.remove("open", "tone-income", "tone-expense");
       elements.modalBody.innerHTML = "";
-
-      if (restoreFocus && state.previousFocus && document.contains(state.previousFocus)) {
-        state.previousFocus.focus();
-      }
+      if (restoreFocus && state.previousFocus && document.contains(state.previousFocus)) state.previousFocus.focus();
       state.previousFocus = null;
     }
 
     function handleDocumentKeydown(event) {
       if (!elements.modalBackdrop.classList.contains("open")) return;
-
       if (event.key === "Escape") {
         event.preventDefault();
         closeModal();
         return;
       }
-
-      if (event.key === "Tab") {
-        trapModalFocus(event);
-      }
+      if (event.key === "Tab") trapModalFocus(event);
     }
 
     function firstFocusableElement(root) {
@@ -2699,7 +1903,6 @@
       return [
         "button:not([disabled])",
         "input:not([disabled])",
-        "select:not([disabled])",
         "textarea:not([disabled])",
         "a[href]",
         "[tabindex]:not([tabindex='-1'])"
@@ -2717,7 +1920,6 @@
 
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -2731,13 +1933,13 @@
       return new Promise(resolve => {
         openModal(title, `
           <div class="confirm-box">
-            ${String(message).split("\n").map(line => `<p class="hint">${escapeHtml(line) || "&nbsp;"}</p>`).join("")}
+            <div class="confirm-message">${escapeHtml(message).replaceAll("\n", "<br>")}</div>
           </div>
           <div class="actions">
             <button class="${danger ? "danger-button" : "primary-button"}" type="button" id="confirmOkButton">${escapeHtml(confirmText)}</button>
             <button class="secondary-button" type="button" id="confirmCancelButton">${escapeHtml(cancelText)}</button>
           </div>
-        `, "center");
+        `);
 
         document.getElementById("confirmOkButton").addEventListener("click", () => {
           closeModal({ restoreFocus: false });
@@ -2754,13 +1956,43 @@
       clearTimeout(state.toastTimer);
       elements.toast.textContent = message;
       elements.toast.classList.add("open");
-      state.toastTimer = setTimeout(() => {
-        elements.toast.classList.remove("open");
-      }, 2600);
+      state.toastTimer = setTimeout(() => elements.toast.classList.remove("open"), 2600);
+    }
+
+    function setupMoneyInput(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.addEventListener("input", () => {
+        const parsed = parseYenInput(input.value);
+        input.value = parsed === null ? "" : formatYenInput(parsed);
+        requestAnimationFrame(() => {
+          const end = input.value.length;
+          try { input.setSelectionRange(end, end); } catch {}
+        });
+      });
+
+      input.addEventListener("blur", () => {
+        const parsed = parseYenInput(input.value);
+        input.value = parsed === null ? "" : formatYenInput(parsed);
+      });
+    }
+
+    function parseYenInput(value) {
+      const digits = String(value || "").replace(/[^0-9]/g, "");
+      if (!digits) return null;
+      const number = Number(digits);
+      return Number.isFinite(number) ? Math.trunc(number) : null;
+    }
+
+    function formatYenInput(value) {
+      const number = Number(String(value ?? "").replace(/[^0-9]/g, ""));
+      if (!Number.isFinite(number) || number <= 0) return "";
+      return `¥ ${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(Math.trunc(number))}`;
     }
 
     function readPositiveAmount(inputId) {
-      const value = Number(document.getElementById(inputId).value);
+      const value = parseYenInput(document.getElementById(inputId).value);
       if (!Number.isFinite(value) || value <= 0) {
         showToast("金額を入力してください。");
         return null;
@@ -2786,13 +2018,16 @@
       return `${month}/${day}`;
     }
 
-
     function todayAsInputValue() {
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
       const day = String(now.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
+    }
+
+    function uniqueStrings(values) {
+      return [...new Set(values.map(value => String(value || "").trim()).filter(Boolean))];
     }
 
     function escapeHtml(value) {
