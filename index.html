@@ -2,9 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>収支管理簿</title>
   <style>
+    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     :root {
       --bg-main: #f1f3ff;
       --bg-fixed: #f4f5f7;
@@ -350,13 +351,18 @@
       min-width: 0;
       display: flex;
       align-items: baseline;
-      gap: 8px;
+      gap: 4px;
       color: var(--fixed-accent-dark);
       font-weight: 900;
       font-size: 15px;
       overflow: hidden;
-      text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .fixed-cost-head-title span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .fixed-cost-head-title small {
@@ -375,9 +381,12 @@
     }
 
     .fixed-cost-head-actions strong {
+      min-width: 92px;
+      text-align: right;
       font-size: 15px;
       font-weight: 900;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .fixed-cost-item {
@@ -396,6 +405,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .fixed-cost-amount {
+      min-width: 82px;
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
     .empty,
@@ -617,12 +633,38 @@
     .field input,
     .field textarea {
       width: 100%;
+      min-width: 0;
       border: 1px solid rgba(100, 116, 139, .36);
       border-radius: 16px;
       outline: none;
       background: rgba(255, 255, 255, .94);
       color: var(--text);
       padding: 12px 13px;
+    }
+
+    .field input {
+      min-height: 48px;
+      line-height: 1.25;
+    }
+
+    .field input[type="date"] {
+      height: 50px;
+      min-height: 50px;
+      padding-block: 0;
+      line-height: normal;
+      text-align: center;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .field input[type="date"]::-webkit-date-and-time-value {
+      min-height: 1.25em;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .field input[type="date"]::-webkit-calendar-picker-indicator {
+      margin: 0;
     }
 
     .field textarea {
@@ -761,10 +803,10 @@
     }
 
     .category-chip {
+      border: 1px solid rgba(217, 119, 6, .32);
       border-radius: 999px;
-      color: var(--fixed-accent-dark);
-      background: rgba(248, 250, 252, .96);
-      border-color: rgba(100, 116, 139, .34);
+      background: rgba(254, 243, 199, .82);
+      color: #92400e;
       padding: 7px 11px;
       font-size: 12px;
       line-height: 1;
@@ -836,7 +878,7 @@
     .fixed-quote-group-head,
     .fixed-quote-item {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
       gap: 10px;
       align-items: center;
     }
@@ -855,19 +897,41 @@
       white-space: nowrap;
     }
 
-    .fixed-quote-title strong {
-      display: block;
+    .fixed-quote-title {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .fixed-quote-title > strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
       color: var(--expense);
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.25;
     }
 
-    .fixed-quote-title span,
-    .fixed-quote-amount {
+    .fixed-quote-title small {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .fixed-quote-category-amount,
+    .fixed-quote-detail-amount {
+      min-width: 82px;
+      text-align: right;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+    }
+
+    .fixed-quote-category-amount {
+      font-size: 15px;
     }
 
     .fixed-quote-item {
@@ -882,15 +946,9 @@
     .fixed-quote-name {
       color: var(--text);
       font-size: 14px;
+      font-weight: 700;
     }
 
-    .fixed-quote-name small {
-      display: inline-block;
-      margin-left: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-    }
 
     .quote-category-button,
     .quote-detail-button {
@@ -1013,6 +1071,13 @@
       .fixed-cost-item {
         grid-template-columns: minmax(0, 1fr) auto auto auto;
         padding: 10px 10px 10px 12px;
+      }
+
+      .fixed-cost-head-actions strong,
+      .fixed-cost-amount,
+      .fixed-quote-category-amount,
+      .fixed-quote-detail-amount {
+        min-width: 76px;
       }
 
       .summary-line span:last-child {
@@ -1351,7 +1416,7 @@
       const listHtml = groups.map(group => `
         <div class="fixed-cost-group">
           <div class="fixed-cost-group-head">
-            <div class="fixed-cost-head-title">${escapeHtml(group.category)}<small>${group.items.length}件</small></div>
+            <div class="fixed-cost-head-title"><span>${escapeHtml(group.category)}</span><small> (${group.items.length}件)</small></div>
             <div class="fixed-cost-head-actions">
               <strong>${formatYen(group.subtotal)}</strong>
               <button class="mini-danger-button" type="button" data-delete-fixed-category="${escapeHtml(group.category)}">カテゴリ削除</button>
@@ -1539,7 +1604,7 @@
           </div>
         </div>
         <div id="fixedQuickArea" class="fixed-quick-area" hidden>
-          <p class="hint">固定費管理簿から、<br>カテゴリ合計または個別明細を引用できます。</p>
+          <p class="hint">固定費管理簿のデータから、<br>カテゴリ別または個別の明細を引用できます。</p>
           <button id="openFixedQuoteButton" class="quote-button" type="button">固定費から引用</button>
         </div>
         <div class="field">
@@ -1630,14 +1695,15 @@
             <div class="fixed-quote-group">
               <div class="fixed-quote-group-head">
                 <div class="fixed-quote-title">
-                  <strong>${escapeHtml(group.category)}</strong>
-                  <span>${formatYen(group.subtotal)} / ${group.items.length}件</span>
+                  <strong>${escapeHtml(group.category)}</strong><small> (${group.items.length}件)</small>
                 </div>
+                <div class="fixed-quote-category-amount">${formatYen(group.subtotal)}</div>
                 <button class="quote-category-button" type="button" data-quote-category-index="${index}">カテゴリで引用</button>
               </div>
               ${group.items.map(item => `
                 <div class="fixed-quote-item">
-                  <div class="fixed-quote-name">${escapeHtml(item.name)}<small>${formatYen(item.amount)}</small></div>
+                  <div class="fixed-quote-name">${escapeHtml(item.name)}</div>
+                  <div class="fixed-quote-detail-amount">${formatYen(item.amount)}</div>
                   <button class="quote-detail-button" type="button" data-quote-detail-id="${escapeHtml(item.id)}">個別で引用</button>
                 </div>
               `).join("")}
@@ -2328,6 +2394,23 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
+
+    function preventSiteZoom() {
+      document.addEventListener("gesturestart", event => event.preventDefault(), { passive: false });
+      document.addEventListener("gesturechange", event => event.preventDefault(), { passive: false });
+      document.addEventListener("gestureend", event => event.preventDefault(), { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener("touchend", event => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+    }
+
+    preventSiteZoom();
   </script>
 </body>
 </html>
