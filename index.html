@@ -30,6 +30,11 @@
       --content-gap: 12px;
       --footer-bottom-gap: 12px;
       --floating-gap: 12px;
+      --list-row-font-size: 15px;
+      --list-row-line-height: 1.25;
+      --list-row-height: 44px;
+      --list-row-left: 12px;
+      --list-row-right: 10px;
     }
 
     * { box-sizing: border-box; }
@@ -257,7 +262,8 @@
       grid-template-columns: minmax(0, 1fr) auto auto;
       gap: 8px;
       align-items: center;
-      padding: 0 10px 0 0;
+      min-height: var(--list-row-height);
+      padding: 0 var(--list-row-right) 0 0;
     }
 
     .transaction-info {
@@ -265,25 +271,26 @@
       display: grid;
       grid-template-columns: 40px minmax(0, 1fr) auto;
       gap: 3px;
-      align-items: baseline;
-      padding: 14px 4px 14px 14px;
+      align-items: center;
+      min-height: var(--list-row-height);
+      padding: 0 4px 0 var(--list-row-left);
     }
 
     .date {
       color: var(--muted);
-      font-size: 15px;
+      font-size: var(--list-row-font-size);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      line-height: 1.2;
+      line-height: var(--list-row-line-height);
       white-space: nowrap;
     }
 
     .name {
       min-width: 0;
       color: var(--text);
-      font-size: 15px;
+      font-size: var(--list-row-font-size);
       font-weight: 700;
-      line-height: 1.2;
+      line-height: var(--list-row-line-height);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -291,9 +298,9 @@
 
     .amount,
     .fixed-cost-amount {
-      font-size: 15px;
+      font-size: var(--list-row-font-size);
       font-weight: 700;
-      line-height: 1.2;
+      line-height: var(--list-row-line-height);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
@@ -342,7 +349,7 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      padding: 12px 14px;
+      padding: 11px 14px;
       background: rgba(226, 232, 240, .96);
       border-bottom: 1px solid rgba(100, 116, 139, .28);
     }
@@ -394,14 +401,17 @@
       grid-template-columns: minmax(0, 1fr) auto auto auto;
       gap: 8px;
       align-items: center;
-      padding: 10px 12px 10px 14px;
+      min-height: var(--list-row-height);
+      height: var(--list-row-height);
+      padding: 0 var(--list-row-right) 0 var(--list-row-left);
     }
 
     .fixed-cost-name {
       min-width: 0;
       color: var(--text);
-      font-size: 14px;
+      font-size: var(--list-row-font-size);
       font-weight: 700;
+      line-height: var(--list-row-line-height);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -621,7 +631,6 @@
     }
 
     .field label,
-    .restore-field-hint,
     .section-title,
     .chip-title {
       color: var(--muted);
@@ -689,7 +698,6 @@
     }
 
     .type-option,
-    .choice-button,
     .category-chip {
       cursor: pointer;
       border: 1px solid rgba(100, 116, 139, .26);
@@ -715,35 +723,6 @@
       color: var(--expense);
     }
 
-    .choice-grid {
-      display: grid;
-      gap: 8px;
-      margin: 10px 0;
-    }
-
-    .choice-grid[hidden] {
-      display: none;
-    }
-
-    .choice-button {
-      width: 100%;
-      border-radius: 17px;
-      padding: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      color: var(--text);
-      font-weight: 900;
-      text-align: left;
-    }
-
-    .choice-sub {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
 
     .fixed-quick-area {
       border: 1px solid rgba(180, 35, 24, .18);
@@ -753,10 +732,8 @@
     }
 
     .hint,
-    .backup-lead,
     .confirm-lead,
     .confirm-message,
-    .restore-field-hint,
     .tiny-status {
       color: var(--muted);
       font-size: 13px;
@@ -1011,6 +988,10 @@
       :root {
         --inner-width: calc(100vw - 32px);
         --floating-gap: 8px;
+        --list-row-font-size: 14px;
+        --list-row-height: 42px;
+        --list-row-left: 10px;
+        --list-row-right: 8px;
       }
 
       .screen-title {
@@ -1035,13 +1016,15 @@
       .transaction-row {
         grid-template-columns: minmax(0, 1fr) auto auto;
         gap: 6px;
-        padding-right: 8px;
+        min-height: var(--list-row-height);
+        padding-right: var(--list-row-right);
       }
 
       .transaction-info {
         grid-template-columns: 38px minmax(0, 1fr) auto;
         gap: 2px;
-        padding: 13px 2px 13px 10px;
+        min-height: var(--list-row-height);
+        padding: 0 2px 0 var(--list-row-left);
       }
 
       .date,
@@ -1049,7 +1032,7 @@
       .amount,
       .fixed-cost-name,
       .fixed-cost-amount {
-        font-size: 14px;
+        font-size: var(--list-row-font-size);
       }
 
       .mini-button,
@@ -1070,7 +1053,9 @@
 
       .fixed-cost-item {
         grid-template-columns: minmax(0, 1fr) auto auto auto;
-        padding: 10px 10px 10px 12px;
+        min-height: var(--list-row-height);
+        height: var(--list-row-height);
+        padding: 0 var(--list-row-right) 0 var(--list-row-left);
       }
 
       .fixed-cost-head-actions strong,
@@ -1235,7 +1220,8 @@
       screen: "main",
       previousFocus: null,
       toastTimer: null,
-      screenVisibilityTimer: null
+      screenVisibilityTimer: null,
+      layoutObserver: null
     };
 
     const elements = {
@@ -1412,7 +1398,7 @@
     }
 
     function renderFixedCostScreen() {
-      const groups = fixedCostGroups();
+      const groups = fixedCostGroups({ sortCategoriesBySubtotal: true });
       const listHtml = groups.map(group => `
         <div class="fixed-cost-group">
           <div class="fixed-cost-group-head">
@@ -1530,7 +1516,7 @@
       });
     }
 
-    function fixedCostGroups({ includeEmpty = true } = {}) {
+    function fixedCostGroups({ includeEmpty = true, sortCategoriesBySubtotal = false } = {}) {
       const groups = new Map();
 
       data.fixedCategories.forEach(category => {
@@ -1546,8 +1532,24 @@
         group.items.push(item);
       });
 
-      const values = [...groups.values()].sort((a, b) => a.category.localeCompare(b.category, "ja"));
-      values.forEach(group => group.items.sort((a, b) => a.name.localeCompare(b.name, "ja")));
+      let values = [...groups.values()];
+      values.forEach(group => group.items.sort((a, b) => {
+        if (a.amount !== b.amount) return b.amount - a.amount;
+        return a.name.localeCompare(b.name, "ja");
+      }));
+
+      if (sortCategoriesBySubtotal) {
+        values = values
+          .map((group, index) => ({ group, index }))
+          .sort((a, b) => {
+            if (a.group.subtotal !== b.group.subtotal) {
+              return b.group.subtotal - a.group.subtotal;
+            }
+            return a.index - b.index;
+          })
+          .map(entry => entry.group);
+      }
+
       return includeEmpty ? values : values.filter(group => group.items.length > 0 && group.subtotal > 0);
     }
 
@@ -1575,6 +1577,7 @@
       openModal(isEdit ? "予定変更" : "予定追加", transactionFormHtml(values), "center");
       setupTransactionForm({ mode, item, values });
       setupMoneyInput("transactionAmountInput");
+      setupEnterNavigation(["transactionDateInput", "transactionNameInput", "transactionAmountInput"]);
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
@@ -1594,7 +1597,7 @@
       return `
         <div class="field">
           <label for="transactionDateInput">月日</label>
-          <input id="transactionDateInput" type="date" value="${escapeHtml(values.date)}">
+          <input id="transactionDateInput" type="date" value="${escapeHtml(values.date)}" enterkeyhint="next">
         </div>
         <div class="field">
           <label>収入/支出</label>
@@ -1609,11 +1612,11 @@
         </div>
         <div class="field">
           <label for="transactionNameInput">名称</label>
-          <input id="transactionNameInput" type="text" value="${escapeHtml(values.name)}">
+          <input id="transactionNameInput" type="text" value="${escapeHtml(values.name)}" enterkeyhint="next">
         </div>
         <div class="field">
           <label for="transactionAmountInput">金額</label>
-          <input id="transactionAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -">
+          <input id="transactionAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -" enterkeyhint="done">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -1656,7 +1659,7 @@
 
       document.querySelectorAll("[data-quote-category-index]").forEach(button => {
         button.addEventListener("click", () => {
-          const groups = fixedCostGroups({ includeEmpty: false });
+          const groups = fixedCostGroups({ includeEmpty: false, sortCategoriesBySubtotal: true });
           const group = groups[Number(button.dataset.quoteCategoryIndex)];
           if (!group) return;
           applyFixedQuote(context, group.category, group.subtotal);
@@ -1678,7 +1681,7 @@
     }
 
     function fixedQuoteModalHtml() {
-      const groups = fixedCostGroups({ includeEmpty: false });
+      const groups = fixedCostGroups({ includeEmpty: false, sortCategoriesBySubtotal: true });
       if (!groups.length) {
         return `
           <div class="empty-mini">固定費明細がありません。<br>固定費管理簿で登録してください。</div>
@@ -1808,7 +1811,7 @@
       openModal("現在の預金残高", `
         <div class="field">
           <label for="balanceInput">現在の預金残高</label>
-          <input id="balanceInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(data.currentBalance))}" placeholder="¥ -">
+          <input id="balanceInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(data.currentBalance))}" placeholder="¥ -" enterkeyhint="done">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -1817,6 +1820,7 @@
       `);
 
       setupMoneyInput("balanceInput");
+      setupEnterNavigation(["balanceInput"]);
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
@@ -1843,6 +1847,7 @@
       openModal(isEdit ? "固定費変更" : "固定費追加", fixedCostFormHtml(values));
       setupFixedCostForm();
       setupMoneyInput("fixedAmountInput");
+      setupEnterNavigation(["fixedCategoryInput", "fixedNameInput", "fixedAmountInput"]);
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
@@ -1867,7 +1872,7 @@
       return `
         <div class="field">
           <label for="fixedCategoryInput">カテゴリ</label>
-          <input id="fixedCategoryInput" type="text" value="${escapeHtml(values.category)}" placeholder="入力で新規カテゴリを作成">
+          <input id="fixedCategoryInput" type="text" value="${escapeHtml(values.category)}" placeholder="入力で新規カテゴリを作成" enterkeyhint="next">
           ${categoryChips ? `
             <div class="category-chip-area">
               <div class="chip-title">既存カテゴリから選択</div>
@@ -1877,11 +1882,11 @@
         </div>
         <div class="field">
           <label for="fixedNameInput">名称</label>
-          <input id="fixedNameInput" type="text" value="${escapeHtml(values.name)}">
+          <input id="fixedNameInput" type="text" value="${escapeHtml(values.name)}" enterkeyhint="next">
         </div>
         <div class="field">
           <label for="fixedAmountInput">金額</label>
-          <input id="fixedAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -">
+          <input id="fixedAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -" enterkeyhint="done">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -2248,9 +2253,6 @@
       if (event.key === "Tab") trapModalFocus(event);
     }
 
-    function firstFocusableElement(root) {
-      return root.querySelector(focusableSelector());
-    }
 
     function focusableSelector() {
       return [
@@ -2317,6 +2319,30 @@
       state.toastTimer = setTimeout(() => elements.toast.classList.remove("open"), 2600);
     }
 
+
+    function setupEnterNavigation(inputIds) {
+      const inputs = inputIds
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+      inputs.forEach((input, index) => {
+        input.addEventListener("keydown", event => {
+          if (event.key !== "Enter") return;
+
+          event.preventDefault();
+          const nextInput = inputs[index + 1];
+
+          if (nextInput) {
+            nextInput.focus({ preventScroll: true });
+            if (typeof nextInput.select === "function") nextInput.select();
+            return;
+          }
+
+          input.blur();
+        });
+      });
+    }
+
     function setupMoneyInput(inputId) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -2327,10 +2353,6 @@
         input.select();
       });
 
-      input.addEventListener("input", () => {
-        // 入力中は整形しない。
-        // 中間の数字を編集できるよう、カーソル位置も動かさない。
-      });
 
       input.addEventListener("blur", () => {
         const parsed = parseYenInput(input.value);
