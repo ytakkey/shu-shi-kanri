@@ -8,18 +8,16 @@
     html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     :root {
       --bg-main: #f1f3ff;
-      --bg-fixed: #f4f5f7;
+      --bg-fixed: #f1f3ff;
       --panel: rgba(255, 255, 255, .94);
-      --panel-strong: rgba(255, 255, 255, .98);
-      --line: rgba(71, 85, 105, .40);
       --text: #172033;
       --muted: #536074;
       --income: #0f766e;
       --expense: #b42318;
       --accent: #4f46e5;
       --accent-dark: #3730a3;
-      --fixed-accent: #64748b;
-      --fixed-accent-dark: #334155;
+      --fixed-accent: var(--accent);
+      --fixed-accent-dark: var(--accent-dark);
       --focus-border: #475569;
       --focus-ring: rgba(71, 85, 105, .18);
       --radius: 22px;
@@ -53,13 +51,12 @@
       padding-bottom: 0;
       height: 100dvh;
       overflow: hidden;
-      overflow-x: hidden;
       transition: background .28s ease;
     }
 
     body.fixed-screen {
       background:
-        radial-gradient(circle at 14% 8%, rgba(100, 116, 139, .18), transparent 34%),
+        radial-gradient(circle at 14% 8%, rgba(79, 70, 229, .16), transparent 34%),
         linear-gradient(135deg, var(--bg-fixed), #f8fbff);
     }
 
@@ -85,7 +82,7 @@
     }
 
     body.fixed-screen .top-balance {
-      background: rgba(244, 245, 247, .82);
+      background: rgba(241, 243, 255, .82);
     }
 
     .top-inner,
@@ -117,10 +114,10 @@
 
     .data-button {
       flex: 0 0 auto;
-      border: 1px solid rgba(100, 116, 139, .30);
+      border: 1px solid rgba(79, 70, 229, .26);
       border-radius: 999px;
       background: rgba(255, 255, 255, .90);
-      color: var(--muted);
+      color: var(--accent-dark);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .56);
       padding: 9px 13px;
       font-size: 14px;
@@ -350,8 +347,8 @@
       gap: 10px;
       align-items: center;
       padding: 11px 14px;
-      background: rgba(226, 232, 240, .96);
-      border-bottom: 1px solid rgba(100, 116, 139, .28);
+      background: rgba(238, 242, 255, .96);
+      border-bottom: 1px solid rgba(79, 70, 229, .22);
     }
 
     .fixed-cost-head-title {
@@ -479,12 +476,12 @@
       flex: 0 1 auto;
       color: var(--accent-dark);
       background: rgba(255, 255, 255, .90);
-      border-color: rgba(39, 103, 73, .30);
+      border-color: rgba(79, 70, 229, .30);
     }
 
     body.fixed-screen .floating-nav {
       color: var(--fixed-accent-dark);
-      border-color: rgba(100, 116, 139, .32);
+      border-color: rgba(79, 70, 229, .30);
     }
 
     .floating-clear {
@@ -743,7 +740,7 @@
     }
 
     .tiny-status.status-success {
-      color: #334155;
+      color: var(--accent-dark);
       font-weight: 900;
     }
 
@@ -762,7 +759,7 @@
       width: 4px;
       height: 14px;
       border-radius: 999px;
-      background: #64748b;
+      background: var(--accent);
       margin-right: 7px;
       vertical-align: -2px;
     }
@@ -822,8 +819,8 @@
       cursor: pointer;
     }
 
-    .primary-button { background: #334155; border-color: rgba(15, 23, 42, .42); color: #fff; }
-    body.fixed-screen .primary-button { background: #334155; border-color: rgba(15, 23, 42, .42); }
+    .primary-button { background: var(--accent); border-color: rgba(79, 70, 229, .42); color: #fff; }
+    body.fixed-screen .primary-button { background: var(--accent); border-color: rgba(79, 70, 229, .42); }
     .secondary-button { background: rgba(248, 250, 252, .94); color: var(--text); }
     .danger-button { background: rgba(254, 226, 226, .96); border-color: rgba(180, 35, 24, .24); color: var(--expense); }
 
@@ -1199,12 +1196,12 @@
     const INTEGER_FORMATTER = new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 });
 
     const defaultFixedCosts = [
-      { id: newId(), category: "クレジット", name: "スマホ代", amount: 7764 },
+      { id: newId(), category: "クレジット", name: "スマホ代", amount: 10000 },
       { id: newId(), category: "クレジット", name: "NISA", amount: 10000 },
-      { id: newId(), category: "クレジット", name: "生活費(B43)", amount: 34000 },
-      { id: newId(), category: "口座振替", name: "家賃", amount: 55650 },
+      { id: newId(), category: "クレジット", name: "生活費", amount: 30000 },
+      { id: newId(), category: "口座振替", name: "家賃", amount: 50000 },
       { id: newId(), category: "口座振替", name: "車ローン", amount: 25000 },
-      { id: newId(), category: "口座振替", name: "学資保険", amount: 5661 }
+      { id: newId(), category: "口座振替", name: "学資保険", amount: 5000 }
     ];
 
     const defaultData = {
@@ -1335,7 +1332,6 @@
         date: String(item.date),
         type: item.type,
         name: String(item.name || "").trim(),
-        category: String(item.category || "").trim(),
         amount: Math.trunc(Number(item.amount))
       })).filter(item =>
         /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
@@ -1476,8 +1472,6 @@
       inactiveScreen.inert = true;
 
       document.body.classList.toggle("fixed-screen", fixed);
-      elements.mainScreen.setAttribute("aria-hidden", String(fixed));
-      elements.fixedCostScreen.setAttribute("aria-hidden", String(!fixed));
       elements.screenTitle.textContent = fixed ? "固定費管理簿" : "収支管理簿";
       elements.screenSwitchButton.textContent = fixed ? "収支管理簿へ" : "固定費管理簿へ";
       elements.addButton.textContent = fixed ? "＋ 固定費追加" : "＋ 予定追加";
@@ -1574,7 +1568,7 @@
         amount: isEdit ? Math.abs(item.amount) : ""
       };
 
-      openModal(isEdit ? "予定変更" : "予定追加", transactionFormHtml(values), "center");
+      openModal(isEdit ? "予定変更" : "予定追加", transactionFormHtml(values));
       setupTransactionForm({ mode, item, values });
       setupMoneyInput("transactionAmountInput");
       setupEnterNavigation(["transactionDateInput", "transactionNameInput", "transactionAmountInput"]);
@@ -1628,7 +1622,7 @@
     function setupTransactionForm(context) {
       setTransactionType(context.values.type);
 
-      document.querySelectorAll("[data-type-option]").forEach(button => {
+      elements.modalBody.querySelectorAll("[data-type-option]").forEach(button => {
         button.addEventListener("click", () => setTransactionType(button.dataset.typeOption));
       });
 
@@ -1645,7 +1639,7 @@
     }
 
     function readTransactionDraft() {
-      const selectedType = document.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
+      const selectedType = elements.modalBody.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
       return {
         date: document.getElementById("transactionDateInput")?.value || todayAsInputValue(),
         type: selectedType,
@@ -1655,9 +1649,9 @@
     }
 
     function openFixedQuoteModal(context) {
-      openModal("固定費から引用", fixedQuoteModalHtml(), "center");
+      openModal("固定費から引用", fixedQuoteModalHtml());
 
-      document.querySelectorAll("[data-quote-category-index]").forEach(button => {
+      elements.modalBody.querySelectorAll("[data-quote-category-index]").forEach(button => {
         button.addEventListener("click", () => {
           const groups = fixedCostGroups({ includeEmpty: false, sortCategoriesBySubtotal: true });
           const group = groups[Number(button.dataset.quoteCategoryIndex)];
@@ -1666,7 +1660,7 @@
         });
       });
 
-      document.querySelectorAll("[data-quote-detail-id]").forEach(button => {
+      elements.modalBody.querySelectorAll("[data-quote-detail-id]").forEach(button => {
         button.addEventListener("click", () => {
           const item = data.fixedCosts.find(cost => cost.id === button.dataset.quoteDetailId);
           if (!item) return;
@@ -1734,7 +1728,7 @@
 
     function setTransactionType(type) {
       const normalized = type === "expense" ? "expense" : "income";
-      document.querySelectorAll("[data-type-option]").forEach(button => {
+      elements.modalBody.querySelectorAll("[data-type-option]").forEach(button => {
         const selected = button.dataset.typeOption === normalized;
         button.classList.toggle(`selected-${button.dataset.typeOption}`, selected);
         button.setAttribute("aria-pressed", String(selected));
@@ -1748,7 +1742,7 @@
     }
 
     function readTransactionForm() {
-      const type = document.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
+      const type = elements.modalBody.querySelector("[data-type-option][aria-pressed='true']")?.dataset.typeOption || "income";
       const date = document.getElementById("transactionDateInput").value;
       const name = document.getElementById("transactionNameInput").value.trim();
       const amount = readPositiveAmount("transactionAmountInput");
@@ -1767,7 +1761,6 @@
         date,
         type,
         name,
-        category: "",
         amount: type === "income" ? amount : -amount
       };
     }
@@ -1896,7 +1889,7 @@
     }
 
     function setupFixedCostForm() {
-      document.querySelectorAll("[data-fill-fixed-category]").forEach(button => {
+      elements.modalBody.querySelectorAll("[data-fill-fixed-category]").forEach(button => {
         button.addEventListener("click", () => {
           if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
           document.getElementById("fixedCategoryInput").value = button.dataset.fillFixedCategory;
@@ -2160,7 +2153,6 @@
           date: `${dateText.slice(0, 4)}-${dateText.slice(4, 6)}-${dateText.slice(6, 8)}`,
           type: amount >= 0 ? "income" : "expense",
           name: readText(item[1]),
-          category: "",
           amount
         };
       });
@@ -2225,7 +2217,7 @@
       }
     }
 
-    function openModal(title, bodyHtml, placement = "center") {
+    function openModal(title, bodyHtml) {
       state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       elements.modalTitle.textContent = title;
       elements.modalBody.innerHTML = bodyHtml;
@@ -2368,8 +2360,10 @@
     }
 
     function formatYenInput(value) {
-      const number = Number(String(value ?? "").replace(/[^0-9]/g, ""));
-      if (!Number.isFinite(number) || number <= 0) return "";
+      const text = String(value ?? "");
+      if (!text.trim()) return "";
+      const number = Number(text.replace(/[^0-9]/g, ""));
+      if (!Number.isFinite(number) || number < 0) return "";
       return `¥ ${INTEGER_FORMATTER.format(Math.trunc(number))}`;
     }
 
