@@ -42,6 +42,7 @@
       --list-row-height: 44px;
       --list-row-left: 12px;
       --list-row-right: 10px;
+      --fc-btn-w: 46px;
     }
 
     * { box-sizing: border-box; }
@@ -387,11 +388,11 @@
     .fixed-cost-group-head {
       position: relative;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
+      gap: 8px;
       align-items: center;
-      padding: 14px 16px 13px 22px;
-      background: #e8e2d3;
+      padding: 11px var(--list-row-right) 10px 22px;
+      background: #ecdec4;
       border-bottom: 1px solid rgba(16, 29, 47, .12);
     }
 
@@ -399,8 +400,8 @@
       content: "";
       position: absolute;
       left: 14px;
-      top: 15px;
-      bottom: 14px;
+      top: 12px;
+      bottom: 11px;
       width: 3px;
       border-radius: 999px;
       background: var(--gold);
@@ -432,16 +433,9 @@
       white-space: nowrap;
     }
 
-    .fixed-cost-head-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      white-space: nowrap;
-    }
-
-    .fixed-cost-head-actions strong {
-      min-width: 92px;
+    .fixed-cost-subtotal {
+      grid-column: 2;
+      min-width: 82px;
       text-align: right;
       color: var(--accent-dark);
       font-size: 15px;
@@ -450,14 +444,27 @@
       white-space: nowrap;
     }
 
+    .fixed-cost-cat-delete {
+      grid-column: 3 / span 2;
+      width: 100%;
+    }
+
     .fixed-cost-item {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
       gap: 8px;
       align-items: center;
       min-height: var(--list-row-height);
       height: var(--list-row-height);
       padding: 0 var(--list-row-right) 0 var(--list-row-left);
+    }
+
+    .fixed-cost-item .mini-button,
+    .fixed-cost-item .mini-danger-button {
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+      text-align: center;
     }
 
     .fixed-cost-name {
@@ -913,7 +920,7 @@
 
     .fixed-quote-list {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .fixed-quote-group {
@@ -929,23 +936,23 @@
     .fixed-quote-item {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
     .fixed-quote-group-head {
       position: relative;
-      padding: 13px 12px 12px 22px;
-      background: #e8e2d3;
+      padding: 9px 10px 8px 20px;
+      background: #ecdec4;
       border-bottom: 1px solid rgba(16, 29, 47, .12);
     }
 
     .fixed-quote-group-head::before {
       content: "";
       position: absolute;
-      left: 14px;
-      top: 14px;
-      bottom: 13px;
+      left: 12px;
+      top: 11px;
+      bottom: 10px;
       width: 3px;
       border-radius: 999px;
       background: var(--gold);
@@ -970,24 +977,24 @@
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--accent-dark);
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 700;
       line-height: 1.25;
     }
 
     .fixed-quote-title small {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       white-space: nowrap;
     }
 
     .fixed-quote-category-amount,
     .fixed-quote-detail-amount {
-      min-width: 82px;
+      min-width: 68px;
       text-align: right;
       color: var(--text);
-      font-size: 14px;
+      font-size: 12.5px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -995,11 +1002,11 @@
 
     .fixed-quote-category-amount {
       color: var(--accent-dark);
-      font-size: 15px;
+      font-size: 13.5px;
     }
 
     .fixed-quote-item {
-      padding: 11px 12px;
+      padding: 9px 10px;
       border-top: 1px solid var(--hairline);
     }
 
@@ -1009,7 +1016,7 @@
 
     .fixed-quote-name {
       color: var(--text);
-      font-size: 14px;
+      font-size: 12.5px;
       font-weight: 600;
     }
 
@@ -1020,8 +1027,8 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, .82);
       color: var(--accent-dark);
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 6px 10px;
+      font-size: 11px;
       line-height: 1;
       font-weight: 700;
       cursor: pointer;
@@ -1136,28 +1143,14 @@
         font-size: 12px;
       }
 
-      .fixed-cost-group-head {
-        align-items: center;
+      .fixed-cost-subtotal,
+      .fixed-cost-amount {
+        min-width: 76px;
       }
 
-      .fixed-cost-head-actions {
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .fixed-cost-item {
-        grid-template-columns: minmax(0, 1fr) auto auto auto;
-        min-height: var(--list-row-height);
-        height: var(--list-row-height);
-        padding: 0 var(--list-row-right) 0 var(--list-row-left);
-      }
-
-      .fixed-cost-head-actions strong,
-      .fixed-cost-amount,
       .fixed-quote-category-amount,
       .fixed-quote-detail-amount {
-        min-width: 76px;
+        min-width: 62px;
       }
 
       .summary-line span:last-child {
@@ -1506,10 +1499,8 @@
         <div class="fixed-cost-group">
           <div class="fixed-cost-group-head">
             <div class="fixed-cost-head-title"><span>${escapeHtml(group.category)}</span><small> (${group.items.length}件)</small></div>
-            <div class="fixed-cost-head-actions">
-              <strong>${formatYen(group.subtotal)}</strong>
-              <button class="mini-danger-button" type="button" data-delete-fixed-category="${escapeHtml(group.category)}">カテゴリ削除</button>
-            </div>
+            <strong class="fixed-cost-subtotal">${formatYen(group.subtotal)}</strong>
+            <button class="mini-danger-button fixed-cost-cat-delete" type="button" data-delete-fixed-category="${escapeHtml(group.category)}">カテゴリ削除</button>
           </div>
           ${group.items.length ? group.items.map(item => `
             <div class="fixed-cost-item">
