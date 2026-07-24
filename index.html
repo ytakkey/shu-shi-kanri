@@ -254,7 +254,6 @@
     .list,
     .fixed-cost-group,
     .empty,
-    .empty-mini,
     .modal,
     .bottom-summary,
     .fixed-bottom-summary {
@@ -498,8 +497,31 @@
     }
 
     .empty-mini {
+      border: 1px solid var(--hairline);
       border-radius: 11px;
+      background: var(--panel);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-highlight);
       padding: 18px 12px;
+    }
+
+    /* カテゴリ内の空表示は明細行と同じ見た目にする */
+    .fixed-cost-group .empty-mini {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--list-row-height);
+      height: var(--list-row-height);
+      padding: 0 var(--list-row-right) 0 var(--list-row-left);
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
+      font-size: var(--list-row-font-size);
+      line-height: var(--list-row-line-height);
     }
 
     .floating-actions {
@@ -1295,20 +1317,35 @@
     });
     const INTEGER_FORMATTER = new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 });
 
+    function sampleDate(monthOffset, day) {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth() + monthOffset, day);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const dayText = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${dayText}`;
+    }
+
     const defaultFixedCosts = [
-      { id: newId(), category: "クレジット", name: "スマホ代", amount: 10000 },
-      { id: newId(), category: "クレジット", name: "NISA", amount: 10000 },
-      { id: newId(), category: "クレジット", name: "生活費", amount: 30000 },
-      { id: newId(), category: "口座振替", name: "家賃", amount: 50000 },
-      { id: newId(), category: "口座振替", name: "車ローン", amount: 25000 },
-      { id: newId(), category: "口座振替", name: "学資保険", amount: 5000 }
+      { id: newId(), category: "口座振替", name: "家賃", amount: 70000 },
+      { id: newId(), category: "口座振替", name: "光熱費", amount: 12000 },
+      { id: newId(), category: "口座振替", name: "保険", amount: 5000 },
+      { id: newId(), category: "カード払い", name: "食費・日用品", amount: 40000 },
+      { id: newId(), category: "カード払い", name: "通信費", amount: 8000 },
+      { id: newId(), category: "カード払い", name: "積立", amount: 20000 },
+      { id: newId(), category: "カード払い", name: "サブスク", amount: 2000 }
     ];
 
     const defaultData = {
-      currentBalance: 0,
-      fixedCategories: ["クレジット", "口座振替"],
+      currentBalance: 250000,
+      fixedCategories: ["口座振替", "カード払い"],
       fixedCosts: clone(defaultFixedCosts),
-      transactions: []
+      transactions: [
+        { id: newId(), date: sampleDate(0, 25), type: "income", name: "給与", amount: 300000 },
+        { id: newId(), date: sampleDate(0, 27), type: "expense", name: "口座振替", amount: -87000 },
+        { id: newId(), date: sampleDate(1, 10), type: "expense", name: "カード払い", amount: -70000 },
+        { id: newId(), date: sampleDate(1, 15), type: "expense", name: "旅行費", amount: -30000 }
+      ]
     };
 
     let data = loadData();
@@ -1375,12 +1412,39 @@
     }
 
     function setupLayoutObservers() {
-      if (!("ResizeObserver" in window)) return;
-      const observer = new ResizeObserver(syncLayoutInsets);
-      [elements.topBalance, elements.bottomSummary, elements.fixedBottomSummary]
-        .filter(Boolean)
-        .forEach(element => observer.observe(element));
-      state.layoutObserver = observer;
+      if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(scheduleLayoutSync);
+        [elements.topBalance, elements.bottomSummary, elements.fixedBottomSummary]
+          .filter(Boolean)
+          .forEach(element => {
+            // padding(セーフエリア)の変化を拾うため border-box を監視する
+            try {
+              observer.observe(element, { box: "border-box" });
+            } catch (error) {
+              observer.observe(element);
+            }
+          });
+        state.layoutObserver = observer;
+      }
+
+      // iOSはセーフエリア・ツールバー・フォントの確定が初回描画より遅れるため再計測する
+      window.addEventListener("orientationchange", scheduleLayoutSync);
+      window.addEventListener("pageshow", scheduleLayoutSync);
+      window.addEventListener("load", scheduleLayoutSync);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", scheduleLayoutSync);
+        window.visualViewport.addEventListener("scroll", scheduleLayoutSync);
+      }
+      if (document.fonts?.ready) document.fonts.ready.then(scheduleLayoutSync).catch(() => {});
+    }
+
+    function scheduleLayoutSync() {
+      if (state.layoutSyncQueued) return;
+      state.layoutSyncQueued = true;
+      requestAnimationFrame(() => {
+        state.layoutSyncQueued = false;
+        syncLayoutInsets();
+      });
     }
 
     function syncLayoutInsets() {
@@ -1395,11 +1459,9 @@
     }
 
     function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return clone(defaultData);
-
       try {
-        return normalizeData(JSON.parse(raw));
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? normalizeData(JSON.parse(raw)) : clone(defaultData);
       } catch {
         return clone(defaultData);
       }
@@ -1449,7 +1511,11 @@
     }
 
     function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {
+        showToast("データを保存できませんでした。\nブラウザの設定をご確認ください。");
+      }
     }
 
     function render() {
@@ -1666,7 +1732,7 @@
         amount: isEdit ? Math.abs(item.amount) : ""
       };
 
-      openModal("", transactionFormHtml(values));
+      openModal("", transactionFormHtml(values), isEdit ? "予定の変更" : "予定の追加");
       setupTransactionForm({ mode, item, values });
       setupMoneyInput("transactionAmountInput");
       setupEnterNavigation(["transactionDateInput", "transactionNameInput", "transactionAmountInput"]);
@@ -1900,7 +1966,7 @@
       openModal("現在の預金残高", `
         <div class="field">
           <label for="balanceInput">現在の預金残高</label>
-          <input id="balanceInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(data.currentBalance))}" placeholder="¥ -" enterkeyhint="done">
+          <input id="balanceInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(data.currentBalance, true))}" placeholder="¥ -" enterkeyhint="done">
         </div>
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
@@ -1908,12 +1974,12 @@
         </div>
       `);
 
-      setupMoneyInput("balanceInput");
+      setupMoneyInput("balanceInput", true);
       setupEnterNavigation(["balanceInput"]);
 
       document.getElementById("cancelButton").addEventListener("click", closeModal);
       document.getElementById("saveButton").addEventListener("click", () => {
-        const value = parseYenInput(document.getElementById("balanceInput").value);
+        const value = parseYenInput(document.getElementById("balanceInput").value, true);
         if (!Number.isFinite(value)) {
           showToast("残高を入力してください。");
           return;
@@ -1933,7 +1999,7 @@
         amount: isEdit ? item.amount : ""
       };
 
-      openModal("", fixedCostFormHtml(values));
+      openModal("", fixedCostFormHtml(values), isEdit ? "固定費の変更" : "固定費の追加");
       setupFixedCostForm();
       setupMoneyInput("fixedAmountInput");
       setupEnterNavigation(["fixedCategoryInput", "fixedNameInput", "fixedAmountInput"]);
@@ -2314,11 +2380,21 @@
       }
     }
 
-    function openModal(title, bodyHtml) {
+    function openModal(title, bodyHtml, ariaLabel = "") {
       state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       const head = elements.modalTitle.closest(".modal-head");
       elements.modalTitle.textContent = title || "";
       if (head) head.hidden = !title;
+
+      // 見出しを出さないモーダルでも読み上げ用の名前を保つ
+      if (title) {
+        elements.modalBackdrop.setAttribute("aria-labelledby", "modalTitle");
+        elements.modalBackdrop.removeAttribute("aria-label");
+      } else {
+        elements.modalBackdrop.removeAttribute("aria-labelledby");
+        elements.modalBackdrop.setAttribute("aria-label", ariaLabel || "入力");
+      }
+
       elements.modalBody.innerHTML = bodyHtml;
       elements.modalBackdrop.classList.add("open");
       requestAnimationFrame(() => {
@@ -2444,36 +2520,40 @@
         });
     }
 
-    function setupMoneyInput(inputId) {
+    function setupMoneyInput(inputId, allowNegative = false) {
       const input = document.getElementById(inputId);
       if (!input) return;
 
       input.addEventListener("focus", () => {
-        const parsed = parseYenInput(input.value);
+        const parsed = parseYenInput(input.value, allowNegative);
         input.value = parsed === null ? "" : String(parsed);
         input.select();
       });
 
 
       input.addEventListener("blur", () => {
-        const parsed = parseYenInput(input.value);
-        input.value = parsed === null ? "" : formatYenInput(parsed);
+        const parsed = parseYenInput(input.value, allowNegative);
+        input.value = parsed === null ? "" : formatYenInput(parsed, allowNegative);
       });
     }
 
-    function parseYenInput(value) {
-      const digits = String(value || "").replace(/[^0-9]/g, "");
+    function parseYenInput(value, allowNegative = false) {
+      // 日本語IMEでの全角数字・全角マイナスを半角に正規化する
+      const text = String(value ?? "").replace(/[０-９－]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+      const digits = text.replace(/[^0-9]/g, "");
       if (!digits) return null;
       const number = Number(digits);
-      return Number.isFinite(number) ? Math.trunc(number) : null;
+      if (!Number.isFinite(number)) return null;
+      const negative = allowNegative && /^\s*[-−ー]/.test(text);
+      return Math.trunc(negative ? -number : number);
     }
 
-    function formatYenInput(value) {
+    function formatYenInput(value, allowNegative = false) {
       const text = String(value ?? "");
       if (!text.trim()) return "";
-      const number = Number(text.replace(/[^0-9]/g, ""));
-      if (!Number.isFinite(number) || number < 0) return "";
-      return `¥ ${INTEGER_FORMATTER.format(Math.trunc(number))}`;
+      const parsed = parseYenInput(text, allowNegative);
+      if (parsed === null) return "";
+      return `${parsed < 0 ? "-" : ""}¥ ${INTEGER_FORMATTER.format(Math.abs(parsed))}`;
     }
 
     function readPositiveAmount(inputId) {
