@@ -43,6 +43,7 @@
       --list-row-left: 12px;
       --list-row-right: 10px;
       --fc-btn-w: 46px;
+      --data-btn-pad-x: 14px;
     }
 
     * { box-sizing: border-box; }
@@ -63,7 +64,6 @@
         radial-gradient(130% 90% at 42% 116%, rgba(18, 138, 92, .08), transparent 62%),
         linear-gradient(175deg, var(--bg-main) 0%, #eef1ee 55%, #f2efe2 100%);
       padding-top: calc(var(--header-h) + var(--content-gap));
-      padding-bottom: 0;
       height: 100dvh;
       overflow: hidden;
       transition: background .28s ease;
@@ -141,12 +141,35 @@
       -webkit-backdrop-filter: blur(12px) saturate(160%);
       color: var(--accent-dark);
       box-shadow: var(--glass-highlight);
-      padding: 9px 14px;
+      padding: 9px var(--data-btn-pad-x);
       font-size: 13px;
       line-height: 1.1;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+    }
+
+    .header-actions {
+      position: relative;
+      display: flex;
+      flex: 0 0 auto;
+    }
+
+    /* レイアウトに影響させないよう絶対配置。右端はボタンの文字端に揃える */
+    .app-version {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: calc(var(--data-btn-pad-x) + 1px);
+      color: var(--muted);
+      opacity: .55;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 500;
+      letter-spacing: .02em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .balance-area {
@@ -196,15 +219,11 @@
     .editable-balance::after {
       content: "タップして編集";
       flex: 0 0 auto;
-      color: var(--gold-dark);
-      background: rgba(255, 255, 255, .88);
-      border: 1px solid rgba(255, 255, 255, .5);
-      border-radius: 999px;
-      padding: 8px 12px;
+      color: rgba(251, 248, 241, .5);
       font-size: 12.5px;
       line-height: 1;
-      font-weight: 700;
-      letter-spacing: 0;
+      font-weight: 600;
+      letter-spacing: .02em;
     }
 
     .main {
@@ -227,7 +246,6 @@
 
     .screen {
       flex: 0 0 50%;
-      width: 50%;
       min-width: 0;
       height: 100%;
       overflow-y: auto;
@@ -246,15 +264,8 @@
     }
 
     .list,
-    .empty,
-    .fixed-cost-list {
-      width: 100%;
-    }
-
-    .list,
     .fixed-cost-group,
     .empty,
-    .modal,
     .bottom-summary,
     .fixed-bottom-summary {
       border: 1px solid var(--hairline);
@@ -274,7 +285,6 @@
     .row,
     .fixed-cost-item {
       border-bottom: 1px solid var(--hairline);
-      background: transparent;
     }
 
     .row:last-child,
@@ -379,11 +389,6 @@
       gap: 10px;
     }
 
-    .fixed-cost-group {
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
     .fixed-cost-group-head {
       position: relative;
       display: grid;
@@ -453,7 +458,6 @@
       grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
       gap: 8px;
       align-items: center;
-      min-height: var(--list-row-height);
       height: var(--list-row-height);
       padding: 0 var(--list-row-right) 0 var(--list-row-left);
     }
@@ -480,8 +484,6 @@
     .fixed-cost-amount {
       min-width: 82px;
       text-align: right;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
     }
 
     .empty,
@@ -511,7 +513,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: var(--list-row-height);
       height: var(--list-row-height);
       padding: 0 var(--list-row-right) 0 var(--list-row-left);
       border: 0;
@@ -569,7 +570,6 @@
 
     body.fixed-screen .floating-nav {
       color: var(--fixed-accent-dark);
-      border-color: rgba(255, 255, 255, .6);
     }
 
     .floating-clear {
@@ -654,15 +654,11 @@
     }
 
     .fixed-bottom-summary .summary-line.total span:first-child {
-      color: var(--muted);
       font-size: 14px;
     }
 
     .fixed-bottom-summary .summary-line.total span:last-child {
       color: var(--fixed-accent-dark);
-      font-size: clamp(25px, 6.2vw, 30px);
-      font-weight: 800;
-      letter-spacing: -.04em;
     }
 
     .modal-backdrop {
@@ -822,7 +818,6 @@
       color: var(--expense);
     }
 
-
     .fixed-quick-area {
       border: 1px solid rgba(195, 63, 46, .18);
       border-radius: 11px;
@@ -922,7 +917,7 @@
     }
 
     .primary-button { background: linear-gradient(155deg, var(--accent), var(--accent-dark)); border-color: rgba(10, 31, 54, .50); color: #fff; box-shadow: 0 14px 26px -14px rgba(10, 22, 39, .50); }
-    body.fixed-screen .primary-button { background: linear-gradient(155deg, var(--fixed-accent), var(--fixed-accent-dark)); border-color: rgba(10, 31, 54, .50); }
+    body.fixed-screen .primary-button { background: linear-gradient(155deg, var(--fixed-accent), var(--fixed-accent-dark)); }
     .secondary-button { background: rgba(255, 255, 255, .68); color: var(--text); }
     .danger-button { background: rgba(195, 63, 46, .10); border-color: rgba(195, 63, 46, .24); color: var(--expense); }
 
@@ -1032,7 +1027,7 @@
       border-top: 1px solid var(--hairline);
     }
 
-    .fixed-quote-item:first-of-type {
+    .fixed-quote-group-head + .fixed-quote-item {
       border-top: 0;
     }
 
@@ -1041,7 +1036,6 @@
       font-size: 12.5px;
       font-weight: 600;
     }
-
 
     .quote-category-button,
     .quote-detail-button {
@@ -1110,6 +1104,7 @@
         --list-row-height: 42px;
         --list-row-left: 10px;
         --list-row-right: 8px;
+        --data-btn-pad-x: 11px;
       }
 
       .screen-title {
@@ -1117,8 +1112,7 @@
       }
 
       .data-button {
-        padding: 8px 11px;
-        font-size: 13px;
+        padding: 8px var(--data-btn-pad-x);
       }
 
       .editable-balance {
@@ -1127,21 +1121,16 @@
       }
 
       .editable-balance::after {
-        padding: 7px 10px;
         font-size: 11.5px;
       }
 
       .transaction-row {
-        grid-template-columns: minmax(0, 1fr) auto auto;
         gap: 6px;
-        min-height: var(--list-row-height);
-        padding-right: var(--list-row-right);
       }
 
       .transaction-info {
         grid-template-columns: 38px minmax(0, 1fr) auto;
         gap: 2px;
-        min-height: var(--list-row-height);
         padding: 0 2px 0 var(--list-row-left);
       }
 
@@ -1149,14 +1138,6 @@
         left: calc(var(--list-row-left) + 38px + 1px);
         top: 10px;
         bottom: 10px;
-      }
-
-      .date,
-      .name,
-      .amount,
-      .fixed-cost-name,
-      .fixed-cost-amount {
-        font-size: var(--list-row-font-size);
       }
 
       .mini-button,
@@ -1179,8 +1160,7 @@
         font-size: 16px;
       }
 
-      .summary-line.total span:last-child,
-      .fixed-bottom-summary .summary-line.total span:last-child {
+      .summary-line.total span:last-child {
         font-size: 27px;
       }
 
@@ -1203,6 +1183,7 @@
       :root {
         --inner-width: calc(100vw - 28px);
         --floating-gap: 7px;
+        --data-btn-pad-x: 9px;
       }
 
       .screen-title {
@@ -1210,7 +1191,7 @@
       }
 
       .data-button {
-        padding: 7px 9px;
+        padding: 7px var(--data-btn-pad-x);
         font-size: 12.5px;
       }
 
@@ -1242,7 +1223,10 @@
     <div class="top-inner">
       <div class="header-topbar">
         <h1 id="screenTitle" class="screen-title">収支管理簿</h1>
-        <button id="dataButton" class="data-button" type="button">データバックアップ・復元</button>
+        <div class="header-actions">
+          <button id="dataButton" class="data-button" type="button">データバックアップ・復元</button>
+          <span class="app-version">v1.0</span>
+        </div>
       </div>
       <div id="balanceArea" class="balance-area">
         <div class="label">現在の預金残高</div>
@@ -1316,14 +1300,13 @@
       maximumFractionDigits: 0
     });
     const INTEGER_FORMATTER = new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 });
+    const JA_COLLATOR = new Intl.Collator("ja");
+    const FOCUSABLE_SELECTOR = "button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])";
+    const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
 
     function sampleDate(monthOffset, day) {
       const now = new Date();
-      const date = new Date(now.getFullYear(), now.getMonth() + monthOffset, day);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const dayText = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${dayText}`;
+      return toDateInputValue(new Date(now.getFullYear(), now.getMonth() + monthOffset, day));
     }
 
     const defaultFixedCosts = [
@@ -1353,9 +1336,13 @@
     const state = {
       screen: "main",
       previousFocus: null,
+      modalOnClose: null,
+      backdropPointerDown: false,
       toastTimer: null,
       screenVisibilityTimer: null,
-      layoutObserver: null
+      layoutSyncQueued: false,
+      headerH: "",
+      footerH: ""
     };
 
     const elements = {
@@ -1377,6 +1364,7 @@
       finalBalance: document.getElementById("finalBalance"),
       fixedCostTotalFooter: document.getElementById("fixedCostTotalFooter"),
       modalBackdrop: document.getElementById("modalBackdrop"),
+      modalHead: document.querySelector(".modal-head"),
       modalTitle: document.getElementById("modalTitle"),
       modalBody: document.getElementById("modalBody"),
       toast: document.getElementById("toast")
@@ -1391,14 +1379,20 @@
     elements.currentBalance.addEventListener("click", openBalanceEditor);
     elements.screenSwitchButton.addEventListener("click", toggleScreen);
     elements.dataButton.addEventListener("click", openDataModal);
+    // モーダル内から始めたドラッグを背景上で離しても閉じない
+    elements.modalBackdrop.addEventListener("pointerdown", event => {
+      state.backdropPointerDown = event.target === elements.modalBackdrop;
+    });
     elements.modalBackdrop.addEventListener("click", event => {
-      if (event.target === elements.modalBackdrop) closeModal();
+      if (event.target === elements.modalBackdrop && state.backdropPointerDown) closeModal();
+      state.backdropPointerDown = false;
     });
     document.addEventListener("keydown", handleDocumentKeydown);
-    window.addEventListener("resize", syncLayoutInsets);
+    window.addEventListener("resize", scheduleLayoutSync);
 
     setupLayoutObservers();
     render();
+    applyScreenVisibility();
     syncLayoutInsets();
 
     function newId() {
@@ -1424,7 +1418,6 @@
               observer.observe(element);
             }
           });
-        state.layoutObserver = observer;
       }
 
       // iOSはセーフエリア・ツールバー・フォントの確定が初回描画より遅れるため再計測する
@@ -1449,12 +1442,18 @@
 
     function syncLayoutInsets() {
       const footer = state.screen === "fixed" ? elements.fixedBottomSummary : elements.bottomSummary;
+      const headerH = `${Math.ceil(elements.topBalance.getBoundingClientRect().height)}px`;
+      const footerH = `${Math.ceil(footer.getBoundingClientRect().height)}px`;
+      const rootStyle = document.documentElement.style;
 
-      if (elements.topBalance) {
-        document.documentElement.style.setProperty("--header-h", `${Math.ceil(elements.topBalance.getBoundingClientRect().height)}px`);
+      // 値が変わった時のみ更新（ルート変数の更新は全体の再計算を招く）
+      if (headerH !== state.headerH) {
+        rootStyle.setProperty("--header-h", headerH);
+        state.headerH = headerH;
       }
-      if (footer) {
-        document.documentElement.style.setProperty("--footer-h", `${Math.ceil(footer.getBoundingClientRect().height)}px`);
+      if (footerH !== state.footerH) {
+        rootStyle.setProperty("--footer-h", footerH);
+        state.footerH = footerH;
       }
     }
 
@@ -1468,7 +1467,7 @@
     }
 
     function normalizeData(input) {
-      if (!input || typeof input.currentBalance !== "number" || !Array.isArray(input.transactions)) {
+      if (!input || !Number.isFinite(input.currentBalance) || !Array.isArray(input.transactions)) {
         throw new Error("invalid data");
       }
 
@@ -1519,19 +1518,26 @@
     }
 
     function render() {
-      renderHeaderAndSummary();
-      renderTransactionList();
-      renderFixedCostScreen();
-      applyScreenVisibility();
+      renderTransactions();
+      renderFixedCosts();
     }
 
-    function renderHeaderAndSummary() {
+    function renderTransactions() {
+      renderSummary();
+      renderTransactionList();
+    }
+
+    function renderFixedCosts() {
+      elements.fixedCostTotalFooter.textContent = formatYen(fixedCostTotal());
+      renderFixedCostScreen();
+    }
+
+    function renderSummary() {
       const totals = transactionTotals(data.transactions);
       elements.currentBalance.textContent = formatYen(data.currentBalance);
       setMoneyText(elements.incomeTotal, totals.income);
       setMoneyText(elements.expenseTotal, totals.expense);
       setMoneyText(elements.finalBalance, data.currentBalance + totals.income + totals.expense);
-      elements.fixedCostTotalFooter.textContent = formatYen(fixedCostTotal());
     }
 
     function renderTransactionList() {
@@ -1645,13 +1651,13 @@
         inactiveScreen.classList.add("screen-hidden");
       }, 360);
 
-      requestAnimationFrame(syncLayoutInsets);
+      scheduleLayoutSync();
     }
 
     function sortedTransactions(transactions) {
       return [...transactions].sort((a, b) => {
-        if (a.date === b.date) return a.name.localeCompare(b.name, "ja");
-        return a.date.localeCompare(b.date);
+        if (a.date === b.date) return JA_COLLATOR.compare(a.name, b.name);
+        return a.date < b.date ? -1 : 1;
       });
     }
 
@@ -1664,13 +1670,13 @@
     }
 
     function sortedFixedCategories() {
-      return [...data.fixedCategories].sort((a, b) => a.localeCompare(b, "ja"));
+      return [...data.fixedCategories].sort(JA_COLLATOR.compare);
     }
 
-    function sortedFixedCosts() {
-      return [...data.fixedCosts].sort((a, b) => {
-        if (a.category === b.category) return a.name.localeCompare(b.name, "ja");
-        return a.category.localeCompare(b.category, "ja");
+    function sortedFixedCosts(fixedCosts) {
+      return [...fixedCosts].sort((a, b) => {
+        if (a.category === b.category) return JA_COLLATOR.compare(a.name, b.name);
+        return JA_COLLATOR.compare(a.category, b.category);
       });
     }
 
@@ -1690,23 +1696,14 @@
         group.items.push(item);
       });
 
-      let values = [...groups.values()];
+      const values = [...groups.values()];
       values.forEach(group => group.items.sort((a, b) => {
         if (a.amount !== b.amount) return b.amount - a.amount;
-        return a.name.localeCompare(b.name, "ja");
+        return JA_COLLATOR.compare(a.name, b.name);
       }));
 
-      if (sortCategoriesBySubtotal) {
-        values = values
-          .map((group, index) => ({ group, index }))
-          .sort((a, b) => {
-            if (a.group.subtotal !== b.group.subtotal) {
-              return b.group.subtotal - a.group.subtotal;
-            }
-            return a.index - b.index;
-          })
-          .map(entry => entry.group);
-      }
+      // 安定ソートのため同額は登録順を保つ
+      if (sortCategoriesBySubtotal) values.sort((a, b) => b.subtotal - a.subtotal);
 
       return includeEmpty ? values : values.filter(group => group.items.length > 0 && group.subtotal > 0);
     }
@@ -1748,7 +1745,7 @@
 
         saveData();
         closeModal();
-        render();
+        renderTransactions();
       });
     }
 
@@ -1940,7 +1937,7 @@
 
       data.transactions = data.transactions.filter(tx => tx.id !== id);
       saveData();
-      render();
+      renderTransactions();
     }
 
     async function clearTransactions() {
@@ -1959,7 +1956,7 @@
 
       data.transactions = [];
       saveData();
-      render();
+      renderTransactions();
     }
 
     function openBalanceEditor() {
@@ -1987,7 +1984,7 @@
         data.currentBalance = Math.trunc(value);
         saveData();
         closeModal();
-        render();
+        renderSummary();
       });
     }
 
@@ -2016,7 +2013,7 @@
 
         saveData();
         closeModal();
-        render();
+        renderFixedCosts();
       });
     }
 
@@ -2092,7 +2089,7 @@
 
       data.fixedCosts = data.fixedCosts.filter(cost => cost.id !== id);
       saveData();
-      render();
+      renderFixedCosts();
     }
 
     async function deleteFixedCategory(category) {
@@ -2108,7 +2105,7 @@
       data.fixedCategories = data.fixedCategories.filter(item => item !== category);
       data.fixedCosts = data.fixedCosts.filter(cost => cost.category !== category);
       saveData();
-      render();
+      renderFixedCosts();
     }
 
     function ensureFixedCategory(category) {
@@ -2239,17 +2236,17 @@
 
       if ("CompressionStream" in window) {
         try {
-          const compressed = await compressText(json);
-          return EXPORT_PREFIX_COMPRESSED + bytesToBase64Url(compressed);
-        } catch {
-          return EXPORT_PREFIX_PLAIN + bytesToBase64Url(new TextEncoder().encode(json));
-        }
+          return EXPORT_PREFIX_COMPRESSED + bytesToBase64Url(await compressText(json));
+        } catch {}
       }
 
       return EXPORT_PREFIX_PLAIN + bytesToBase64Url(new TextEncoder().encode(json));
     }
 
-    async function decodeExportString(text) {
+    async function decodeExportString(input) {
+      // 転記時に混入した改行・空白を除去する
+      const text = input.replace(/\s+/g, "");
+
       if (text.startsWith(EXPORT_PREFIX_COMPRESSED)) {
         const bytes = base64UrlToBytes(text.slice(EXPORT_PREFIX_COMPRESSED.length));
         const json = await decompressText(bytes);
@@ -2283,7 +2280,7 @@
         item.amount
       ]);
 
-      const fixedCosts = sortedFixedCosts().map(item => [
+      const fixedCosts = sortedFixedCosts(sourceData.fixedCosts).map(item => [
         textIndex(item.category),
         textIndex(item.name),
         item.amount
@@ -2381,10 +2378,13 @@
     }
 
     function openModal(title, bodyHtml, ariaLabel = "") {
-      state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      const head = elements.modalTitle.closest(".modal-head");
+      // モーダル内の画面遷移では最初の呼び出し元を保持する
+      if (!elements.modalBackdrop.classList.contains("open")) {
+        state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      }
+      runModalOnClose();
       elements.modalTitle.textContent = title || "";
-      if (head) head.hidden = !title;
+      elements.modalHead.hidden = !title;
 
       // 見出しを出さないモーダルでも読み上げ用の名前を保つ
       if (title) {
@@ -2405,12 +2405,23 @@
     function closeModal({ restoreFocus = true } = {}) {
       elements.modalBackdrop.classList.remove("open");
       elements.modalBody.innerHTML = "";
+      runModalOnClose();
       if (restoreFocus && state.previousFocus && document.contains(state.previousFocus)) state.previousFocus.focus();
       state.previousFocus = null;
     }
 
+    function runModalOnClose() {
+      const onClose = state.modalOnClose;
+      state.modalOnClose = null;
+      if (onClose) onClose();
+    }
+
+    function isImeComposing(event) {
+      return event.isComposing || event.keyCode === 229;
+    }
+
     function handleDocumentKeydown(event) {
-      if (!elements.modalBackdrop.classList.contains("open")) return;
+      if (!elements.modalBackdrop.classList.contains("open") || isImeComposing(event)) return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeModal();
@@ -2419,19 +2430,8 @@
       if (event.key === "Tab") trapModalFocus(event);
     }
 
-
-    function focusableSelector() {
-      return [
-        "button:not([disabled])",
-        "input:not([disabled])",
-        "textarea:not([disabled])",
-        "a[href]",
-        "[tabindex]:not([tabindex='-1'])"
-      ].join(",");
-    }
-
     function trapModalFocus(event) {
-      const focusable = [...elements.modalBackdrop.querySelectorAll(focusableSelector())]
+      const focusable = [...elements.modalBackdrop.querySelectorAll(FOCUSABLE_SELECTOR)]
         .filter(element => element.offsetParent !== null || element === document.activeElement);
       if (!focusable.length) {
         event.preventDefault();
@@ -2441,7 +2441,11 @@
 
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      // 背景にフォーカスがある時もモーダル内に留める
+      if (!focusable.includes(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -2467,13 +2471,15 @@
           </div>
         `);
 
+        // Esc・背景タップで閉じた場合はキャンセル扱い
+        state.modalOnClose = () => resolve(false);
         document.getElementById("confirmOkButton").addEventListener("click", () => {
-          closeModal({ restoreFocus: false });
           resolve(true);
+          closeModal({ restoreFocus: false });
         });
         document.getElementById("confirmCancelButton").addEventListener("click", () => {
-          closeModal();
           resolve(false);
+          closeModal();
         });
       });
     }
@@ -2485,7 +2491,6 @@
       state.toastTimer = setTimeout(() => elements.toast.classList.remove("open"), 2600);
     }
 
-
     function setupEnterNavigation(inputIds) {
       const inputs = inputIds
         .map(id => document.getElementById(id))
@@ -2493,7 +2498,8 @@
 
       inputs.forEach((input, index) => {
         input.addEventListener("keydown", event => {
-          if (event.key !== "Enter") return;
+          // IME変換確定の Enter は次の欄へ進めない
+          if (event.key !== "Enter" || isImeComposing(event)) return;
 
           event.preventDefault();
           const nextInput = inputs[index + 1];
@@ -2530,7 +2536,6 @@
         input.select();
       });
 
-
       input.addEventListener("blur", () => {
         const parsed = parseYenInput(input.value, allowNegative);
         input.value = parsed === null ? "" : formatYenInput(parsed, allowNegative);
@@ -2549,20 +2554,18 @@
     }
 
     function formatYenInput(value, allowNegative = false) {
-      const text = String(value ?? "");
-      if (!text.trim()) return "";
-      const parsed = parseYenInput(text, allowNegative);
+      const parsed = parseYenInput(value, allowNegative);
       if (parsed === null) return "";
       return `${parsed < 0 ? "-" : ""}¥ ${INTEGER_FORMATTER.format(Math.abs(parsed))}`;
     }
 
     function readPositiveAmount(inputId) {
       const value = parseYenInput(document.getElementById(inputId).value);
-      if (!Number.isFinite(value) || value <= 0) {
+      if (value === null || value <= 0) {
         showToast("金額を入力してください。");
         return null;
       }
-      return Math.trunc(value);
+      return value;
     }
 
     function formatYen(value) {
@@ -2580,11 +2583,11 @@
     }
 
     function todayAsInputValue() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return toDateInputValue(new Date());
+    }
+
+    function toDateInputValue(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     }
 
     function uniqueStrings(values) {
@@ -2592,18 +2595,13 @@
     }
 
     function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+      return String(value).replace(/[&<>"']/g, char => HTML_ESCAPES[char]);
     }
 
     function preventSiteZoom() {
-      document.addEventListener("gesturestart", event => event.preventDefault(), { passive: false });
-      document.addEventListener("gesturechange", event => event.preventDefault(), { passive: false });
-      document.addEventListener("gestureend", event => event.preventDefault(), { passive: false });
+      ["gesturestart", "gesturechange", "gestureend"].forEach(type => {
+        document.addEventListener(type, event => event.preventDefault(), { passive: false });
+      });
 
       let lastTouchEnd = 0;
       document.addEventListener("touchend", event => {
