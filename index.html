@@ -9,7 +9,6 @@
     :root {
       color-scheme: light;
       --bg-main: #f1efe6;
-      --bg-fixed: #f1efe6;
       --panel: rgba(255, 255, 255, .58);
       --text: #101d2f;
       --muted: #5c6b84;
@@ -17,16 +16,12 @@
       --expense: #c33f2e;
       --accent: #163659;
       --accent-dark: #0a1f36;
-      --gold: #c6a15b;
       --gold-dark: #8a6a2f;
       --gold-pale: rgba(198, 161, 91, .16);
       --hairline: rgba(16, 29, 47, .09);
       --hairline-strong: rgba(16, 29, 47, .16);
       --glass-blur: blur(26px) saturate(180%);
       --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .75);
-      --fixed-accent: var(--accent);
-      --fixed-accent-dark: var(--accent-dark);
-      --focus-border: var(--accent);
       --focus-ring: rgba(22, 54, 89, .22);
       --radius: 14px;
       --radius-sm: 10px;
@@ -79,7 +74,7 @@
         radial-gradient(120% 70% at 10% -10%, rgba(22, 54, 89, .16), transparent 60%),
         radial-gradient(110% 80% at 108% 4%, rgba(198, 161, 91, .14), transparent 56%),
         radial-gradient(130% 90% at 42% 116%, rgba(22, 54, 89, .07), transparent 62%),
-        linear-gradient(175deg, var(--bg-fixed) 0%, #eef1ee 55%, #f2efe2 100%);
+        linear-gradient(175deg, var(--bg-main) 0%, #eef1ee 55%, #f2efe2 100%);
     }
 
     button,
@@ -133,10 +128,6 @@
       letter-spacing: -.02em;
     }
 
-    body.fixed-screen .screen-title {
-      color: var(--fixed-accent-dark);
-    }
-
     .data-button {
       flex: 0 0 auto;
       border: 1px solid var(--hairline-strong);
@@ -181,6 +172,7 @@
 
     .bulk-select .data-button {
       min-width: calc(5em + var(--data-btn-pad-x) * 2 + 2px);
+      touch-action: manipulation;
     }
 
     .bulk-count {
@@ -456,6 +448,7 @@
       column-gap: 0;
       padding-left: var(--tx-row-left);
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     body.bulk-edit .transaction-row .mini-button,
@@ -494,25 +487,13 @@
     }
 
     .fixed-cost-group-head {
-      position: relative;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
       gap: 8px;
       align-items: center;
-      padding: 11px var(--list-row-right) 10px 22px;
-      background: #ecdec4;
-      border-bottom: 1px solid rgba(16, 29, 47, .12);
-    }
-
-    .fixed-cost-group-head::before {
-      content: "";
-      position: absolute;
-      left: 14px;
-      top: 12px;
-      bottom: 11px;
-      width: 3px;
-      border-radius: 999px;
-      background: var(--gold);
+      padding: 11px var(--list-row-right) 10px var(--list-row-left);
+      background: var(--gold-pale);
+      border-bottom: 1px solid rgba(16, 29, 47, .10);
     }
 
     .fixed-cost-head-title {
@@ -672,10 +653,6 @@
       border-color: rgba(255, 255, 255, .6);
     }
 
-    body.fixed-screen .floating-nav {
-      color: var(--fixed-accent-dark);
-    }
-
     .floating-clear {
       flex: 0 0 auto;
       color: var(--expense);
@@ -688,14 +665,6 @@
       color: #fff;
       background: linear-gradient(155deg, var(--accent), var(--accent-dark));
       border-color: rgba(255, 255, 255, .30);
-    }
-
-    body.fixed-screen .floating-add {
-      background: linear-gradient(155deg, var(--fixed-accent), var(--fixed-accent-dark));
-    }
-
-    body.fixed-screen .floating-clear {
-      display: none;
     }
 
     .floating-actions .bulk-done {
@@ -784,7 +753,7 @@
     }
 
     .fixed-bottom-summary .summary-line.total span:last-child {
-      color: var(--fixed-accent-dark);
+      color: var(--accent-dark);
     }
 
     .modal-backdrop {
@@ -902,13 +871,13 @@
       resize: vertical;
       word-break: break-all;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 10px;
+      line-height: 1.35;
     }
 
     .field input:focus,
     .field textarea:focus {
-      border-color: var(--focus-border);
+      border-color: var(--accent);
       box-shadow: 0 0 0 4px var(--focus-ring);
     }
 
@@ -976,17 +945,6 @@
       letter-spacing: .01em;
     }
 
-    .section-title::before {
-      content: "";
-      display: inline-block;
-      width: 4px;
-      height: 14px;
-      border-radius: 999px;
-      background: var(--gold);
-      margin-right: 7px;
-      vertical-align: -2px;
-    }
-
     .category-chip-area {
       display: grid;
       gap: 7px;
@@ -1043,7 +1001,6 @@
     }
 
     .primary-button { background: linear-gradient(155deg, var(--accent), var(--accent-dark)); border-color: rgba(10, 31, 54, .50); color: #fff; box-shadow: 0 14px 26px -14px rgba(10, 22, 39, .50); }
-    body.fixed-screen .primary-button { background: linear-gradient(155deg, var(--fixed-accent), var(--fixed-accent-dark)); }
     .secondary-button { background: rgba(255, 255, 255, .68); color: var(--text); }
     .danger-button { background: rgba(195, 63, 46, .10); border-color: rgba(195, 63, 46, .24); color: var(--expense); }
 
@@ -1084,21 +1041,9 @@
     }
 
     .fixed-quote-group-head {
-      position: relative;
-      padding: 9px 10px 8px 20px;
-      background: #ecdec4;
-      border-bottom: 1px solid rgba(16, 29, 47, .12);
-    }
-
-    .fixed-quote-group-head::before {
-      content: "";
-      position: absolute;
-      left: 12px;
-      top: 11px;
-      bottom: 10px;
-      width: 3px;
-      border-radius: 999px;
-      background: var(--gold);
+      padding: 9px 10px 8px;
+      background: var(--gold-pale);
+      border-bottom: 1px solid rgba(16, 29, 47, .10);
     }
 
     .fixed-quote-title,
@@ -1187,12 +1132,6 @@
 
     .backup-output textarea {
       min-height: 78px;
-    }
-
-    #backupText,
-    #importText {
-      font-size: 10px;
-      line-height: 1.35;
     }
 
     .toast {
@@ -1354,7 +1293,7 @@
             <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
             <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
           </div>
-          <span class="app-version">v1.1</span>
+          <span class="app-version">v1.2</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -2827,6 +2766,8 @@
 
       let lastTouchEnd = 0;
       document.addEventListener("touchend", event => {
+        // 一括編集の行選択は連続タップを妨げない（拡大は touch-action で防ぐ）
+        if (state.bulkEdit && event.target.closest(".transaction-row, #selectAllButton")) return;
         const now = Date.now();
         if (now - lastTouchEnd <= 300) {
           event.preventDefault();
