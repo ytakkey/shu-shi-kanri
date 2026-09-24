@@ -44,6 +44,11 @@
       --list-row-right: 10px;
       --fc-btn-w: 46px;
       --data-btn-pad-x: 14px;
+      --tx-row-left: calc(var(--list-row-left) - 2px);
+      --date-pad-r: 6px;
+      /* 数字4桁＋スラッシュ＋右余白が必ず収まる幅（全行共通） */
+      --date-col-w: calc(5ch + var(--date-pad-r));
+      --excluded-text: rgba(16, 29, 47, .3);
     }
 
     * { box-sizing: border-box; }
@@ -155,6 +160,37 @@
       flex: 0 0 auto;
     }
 
+    /* バックアップボタンの領域内に重ね、ヘッダーの寸法を変えない */
+    .bulk-select {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body.bulk-edit .bulk-select {
+      display: flex;
+    }
+
+    body.bulk-edit #dataButton {
+      visibility: hidden;
+    }
+
+    .bulk-select .data-button {
+      min-width: calc(5em + var(--data-btn-pad-x) * 2 + 2px);
+    }
+
+    .bulk-count {
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
     /* レイアウトに影響させないよう絶対配置。右端はボタンの文字端に揃える */
     .app-version {
       position: absolute;
@@ -224,6 +260,14 @@
       line-height: 1;
       font-weight: 600;
       letter-spacing: .02em;
+    }
+
+    .editable-balance:disabled {
+      cursor: default;
+    }
+
+    .editable-balance:disabled::after {
+      visibility: hidden;
     }
 
     .main {
@@ -305,17 +349,19 @@
       position: relative;
       min-width: 0;
       display: grid;
-      grid-template-columns: 40px minmax(0, 1fr) auto;
+      grid-template-columns: var(--date-col-w) minmax(0, 1fr) auto;
       gap: 3px;
       align-items: center;
       min-height: var(--list-row-height);
-      padding: 0 4px 0 var(--list-row-left);
+      padding: 0 4px 0 var(--tx-row-left);
+      font-size: var(--list-row-font-size);
+      font-weight: 600;
     }
 
     .transaction-info::after {
       content: "";
       position: absolute;
-      left: calc(var(--list-row-left) + 40px + 1.5px);
+      left: calc(var(--tx-row-left) + var(--date-col-w) + 1.5px);
       top: 11px;
       bottom: 11px;
       width: 1px;
@@ -330,6 +376,8 @@
       font-variant-numeric: tabular-nums;
       line-height: var(--list-row-line-height);
       white-space: nowrap;
+      text-align: right;
+      padding-right: var(--date-pad-r);
     }
 
     .name {
@@ -358,6 +406,62 @@
     .amount.expense,
     .money-negative { color: var(--expense) !important; }
     .money-zero { color: var(--text) !important; }
+
+    .transaction-row.excluded .date,
+    .transaction-row.excluded .name,
+    .transaction-row.excluded .amount {
+      color: var(--excluded-text) !important;
+    }
+
+    .bulk-check {
+      display: none;
+      position: relative;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 1.5px solid rgba(16, 29, 47, .28);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .7);
+      cursor: pointer;
+    }
+
+    .bulk-check::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 2.5px;
+      width: 5px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      opacity: 0;
+    }
+
+    .transaction-row.selected .bulk-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .transaction-row.selected .bulk-check::after {
+      opacity: 1;
+    }
+
+    body.bulk-edit .bulk-check {
+      display: block;
+    }
+
+    body.bulk-edit .transaction-row {
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 0;
+      padding-left: var(--tx-row-left);
+      cursor: pointer;
+    }
+
+    body.bulk-edit .transaction-row .mini-button,
+    body.bulk-edit .transaction-row .mini-danger-button {
+      display: none;
+    }
 
     .mini-button,
     .mini-danger-button {
@@ -592,6 +696,28 @@
 
     body.fixed-screen .floating-clear {
       display: none;
+    }
+
+    .floating-actions .bulk-done {
+      flex: 0 1 auto;
+      width: 7em;
+      min-width: 0;
+    }
+
+    .floating-actions .bulk-action {
+      flex: 0 0 auto;
+      width: 5em;
+      padding: 0;
+    }
+
+    .floating-nav:disabled,
+    .floating-clear:disabled {
+      opacity: .4;
+      cursor: default;
+    }
+
+    button:disabled:active {
+      transform: none;
     }
 
     .bottom-summary,
@@ -1129,13 +1255,12 @@
       }
 
       .transaction-info {
-        grid-template-columns: 38px minmax(0, 1fr) auto;
         gap: 2px;
-        padding: 0 2px 0 var(--list-row-left);
+        padding: 0 2px 0 var(--tx-row-left);
       }
 
       .transaction-info::after {
-        left: calc(var(--list-row-left) + 38px + 1px);
+        left: calc(var(--tx-row-left) + var(--date-col-w) + 1px);
         top: 10px;
         bottom: 10px;
       }
@@ -1225,7 +1350,11 @@
         <h1 id="screenTitle" class="screen-title">収支管理簿</h1>
         <div class="header-actions">
           <button id="dataButton" class="data-button" type="button">データバックアップ・復元</button>
-          <span class="app-version">v1.0</span>
+          <div class="bulk-select">
+            <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
+            <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
+          </div>
+          <span class="app-version">v1.1</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -1248,9 +1377,13 @@
 
   <div class="floating-actions" aria-label="画面操作">
     <button id="screenSwitchButton" class="floating-nav" type="button">固定費管理簿へ</button>
+    <button id="bulkDoneButton" class="floating-add bulk-done" type="button" hidden>完了</button>
     <div class="floating-spacer" aria-hidden="true"></div>
-    <button id="clearTransactionsButton" class="floating-clear" type="button">入力クリア</button>
-    <button id="addButton" class="floating-add" type="button">＋ 予定追加</button>
+    <button id="bulkEditButton" class="floating-add" type="button">一括編集</button>
+    <button id="addButton" class="floating-add" type="button">予定追加</button>
+    <button id="bulkExcludeButton" class="floating-nav bulk-action" type="button" hidden>除外</button>
+    <button id="bulkIncludeButton" class="floating-nav bulk-action" type="button" hidden>含める</button>
+    <button id="bulkDeleteButton" class="floating-clear bulk-action" type="button" hidden>削除</button>
   </div>
 
   <footer class="bottom-summary" aria-label="収支集計">
@@ -1335,6 +1468,8 @@
 
     const state = {
       screen: "main",
+      bulkEdit: false,
+      selectedIds: new Set(),
       previousFocus: null,
       modalOnClose: null,
       backdropPointerDown: false,
@@ -1357,7 +1492,13 @@
       transactionList: document.getElementById("transactionList"),
       fixedCostContent: document.getElementById("fixedCostContent"),
       screenSwitchButton: document.getElementById("screenSwitchButton"),
-      clearTransactionsButton: document.getElementById("clearTransactionsButton"),
+      bulkEditButton: document.getElementById("bulkEditButton"),
+      bulkDoneButton: document.getElementById("bulkDoneButton"),
+      bulkCount: document.getElementById("bulkCount"),
+      selectAllButton: document.getElementById("selectAllButton"),
+      bulkExcludeButton: document.getElementById("bulkExcludeButton"),
+      bulkIncludeButton: document.getElementById("bulkIncludeButton"),
+      bulkDeleteButton: document.getElementById("bulkDeleteButton"),
       addButton: document.getElementById("addButton"),
       incomeTotal: document.getElementById("incomeTotal"),
       expenseTotal: document.getElementById("expenseTotal"),
@@ -1374,7 +1515,12 @@
       if (state.screen === "fixed") openFixedCostModal({ mode: "add" });
       else openTransactionModal({ mode: "add" });
     });
-    elements.clearTransactionsButton.addEventListener("click", clearTransactions);
+    elements.bulkEditButton.addEventListener("click", enterBulkEdit);
+    elements.bulkDoneButton.addEventListener("click", () => setBulkEdit(false));
+    elements.selectAllButton.addEventListener("click", toggleSelectAll);
+    elements.bulkExcludeButton.addEventListener("click", () => setSelectedExcluded(true));
+    elements.bulkIncludeButton.addEventListener("click", () => setSelectedExcluded(false));
+    elements.bulkDeleteButton.addEventListener("click", deleteSelectedTransactions);
     elements.transactionList.addEventListener("click", handleTransactionListClick);
     elements.currentBalance.addEventListener("click", openBalanceEditor);
     elements.screenSwitchButton.addEventListener("click", toggleScreen);
@@ -1493,7 +1639,8 @@
         date: String(item.date),
         type: item.type,
         name: String(item.name || "").trim(),
-        amount: Math.trunc(Number(item.amount))
+        amount: Math.trunc(Number(item.amount)),
+        excluded: item.excluded === true
       })).filter(item =>
         /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
         (item.type === "income" || item.type === "expense") &&
@@ -1544,16 +1691,21 @@
       const transactions = sortedTransactions(data.transactions);
       if (!transactions.length) {
         elements.transactionList.className = "empty";
-        elements.transactionList.innerHTML = "予定がありません。<br>右下の「＋ 予定追加」から登録してください。";
+        elements.transactionList.innerHTML = "予定がありません。<br>右下の「予定追加」から登録してください。";
         return;
       }
 
+      const bulk = state.bulkEdit;
       elements.transactionList.className = "list";
       elements.transactionList.innerHTML = transactions.map(item => {
         const amountClass = item.amount >= 0 ? "income" : "expense";
+        const selected = bulk && state.selectedIds.has(item.id);
+        const rowClass = `row transaction-row${item.excluded ? " excluded" : ""}${selected ? " selected" : ""}`;
+        const label = item.excluded ? `${item.name}（計算から除外）` : item.name;
         return `
-          <div class="row transaction-row" data-id="${escapeHtml(item.id)}">
-            <div class="transaction-info" aria-label="${escapeHtml(item.name)}">
+          <div class="${rowClass}" data-id="${escapeHtml(item.id)}">
+            <button class="bulk-check" type="button" aria-label="選択" aria-pressed="${selected}"></button>
+            <div class="transaction-info" aria-label="${escapeHtml(label)}">
               <div class="date">${formatMonthDay(item.date)}</div>
               <div class="name">${escapeHtml(item.name)}</div>
               <div class="amount ${amountClass}">${formatSignedYen(item.amount)}</div>
@@ -1563,6 +1715,7 @@
           </div>
         `;
       }).join("");
+      updateBulkSelectionUi();
     }
 
     function renderFixedCostScreen() {
@@ -1587,12 +1740,18 @@
 
       elements.fixedCostContent.innerHTML = `
         <div class="fixed-cost-list">
-          ${listHtml || '<div class="empty-mini">固定費カテゴリがありません。<br>右下の「＋ 固定費追加」から登録してください。</div>'}
+          ${listHtml || '<div class="empty-mini">固定費カテゴリがありません。<br>右下の「固定費追加」から登録してください。</div>'}
         </div>
       `;
     }
 
     function handleTransactionListClick(event) {
+      if (state.bulkEdit) {
+        const row = event.target.closest(".transaction-row");
+        if (row) toggleSelection(row);
+        return;
+      }
+
       const deleteButton = event.target.closest("[data-delete-transaction-id]");
       if (deleteButton) {
         deleteTransaction(deleteButton.dataset.deleteTransactionId);
@@ -1644,8 +1803,8 @@
       document.body.classList.toggle("fixed-screen", fixed);
       elements.screenTitle.textContent = fixed ? "固定費管理簿" : "収支管理簿";
       elements.screenSwitchButton.textContent = fixed ? "収支管理簿へ" : "固定費管理簿へ";
-      elements.addButton.textContent = fixed ? "＋ 固定費追加" : "＋ 予定追加";
-      elements.clearTransactionsButton.hidden = fixed;
+      elements.addButton.textContent = fixed ? "固定費追加" : "予定追加";
+      elements.bulkEditButton.hidden = fixed;
 
       state.screenVisibilityTimer = setTimeout(() => {
         inactiveScreen.classList.add("screen-hidden");
@@ -1663,6 +1822,7 @@
 
     function transactionTotals(transactions) {
       return transactions.reduce((totals, item) => {
+        if (item.excluded) return totals;
         if (item.amount > 0) totals.income += item.amount;
         if (item.amount < 0) totals.expense += item.amount;
         return totals;
@@ -1940,23 +2100,84 @@
       renderTransactions();
     }
 
-    async function clearTransactions() {
+    function enterBulkEdit() {
       if (!data.transactions.length) {
-        showToast("削除する予定がありません。");
+        showToast("編集する予定がありません。");
         return;
       }
+      setBulkEdit(true);
+    }
+
+    function setBulkEdit(on) {
+      state.bulkEdit = on;
+      state.selectedIds.clear();
+      document.body.classList.toggle("bulk-edit", on);
+
+      [elements.screenSwitchButton, elements.bulkEditButton, elements.addButton]
+        .forEach(button => { button.hidden = on; });
+      [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton]
+        .forEach(button => { button.hidden = !on; });
+      elements.currentBalance.disabled = on;
+
+      renderTransactionList();
+    }
+
+    function toggleSelection(row) {
+      const id = row.dataset.id;
+      const selected = !state.selectedIds.has(id);
+      if (selected) state.selectedIds.add(id);
+      else state.selectedIds.delete(id);
+      row.classList.toggle("selected", selected);
+      row.querySelector(".bulk-check").setAttribute("aria-pressed", String(selected));
+      updateBulkSelectionUi();
+    }
+
+    function toggleSelectAll() {
+      const selectAll = state.selectedIds.size < data.transactions.length;
+      state.selectedIds = new Set(selectAll ? data.transactions.map(tx => tx.id) : []);
+      renderTransactionList();
+    }
+
+    function updateBulkSelectionUi() {
+      if (!state.bulkEdit) return;
+      const count = state.selectedIds.size;
+      const allSelected = count > 0 && count === data.transactions.length;
+      elements.bulkCount.textContent = `${count}件選択中`;
+      elements.selectAllButton.textContent = allSelected ? "選択解除" : "すべて選択";
+      elements.selectAllButton.setAttribute("aria-pressed", String(allSelected));
+      [elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton]
+        .forEach(button => { button.disabled = count === 0; });
+    }
+
+    function setSelectedExcluded(excluded) {
+      data.transactions.forEach(item => {
+        if (state.selectedIds.has(item.id)) item.excluded = excluded;
+      });
+      state.selectedIds.clear();
+      saveData();
+      renderTransactions();
+    }
+
+    async function deleteSelectedTransactions() {
+      const count = state.selectedIds.size;
+      if (!count) return;
 
       const ok = await showConfirm({
-        title: "入力クリア",
-        message: `収支管理簿画面の予定 ${data.transactions.length}件を削除します。\n現在の預金残高と固定費管理簿のデータは削除されません。`,
-        confirmText: "削除",
+        title: "予定削除",
+        message: `選択した予定 ${count}件を削除します。\nこの操作は元に戻せません。`,
         danger: true
       });
       if (!ok) return;
 
-      data.transactions = [];
+      data.transactions = data.transactions.filter(tx => !state.selectedIds.has(tx.id));
       saveData();
-      renderTransactions();
+      if (data.transactions.length) {
+        state.selectedIds.clear();
+        renderTransactions();
+      } else {
+        renderSummary();
+        setBulkEdit(false);
+      }
     }
 
     function openBalanceEditor() {
@@ -2274,11 +2495,11 @@
         return index;
       };
 
-      const transactions = sortedTransactions(sourceData.transactions).map(item => [
-        Number(item.date.replaceAll("-", "")),
-        textIndex(item.name),
-        item.amount
-      ]);
+      const transactions = sortedTransactions(sourceData.transactions).map(item => {
+        const row = [Number(item.date.replaceAll("-", "")), textIndex(item.name), item.amount];
+        if (item.excluded) row.push(1);
+        return row;
+      });
 
       const fixedCosts = sortedFixedCosts(sourceData.fixedCosts).map(item => [
         textIndex(item.category),
@@ -2313,7 +2534,8 @@
           date: `${dateText.slice(0, 4)}-${dateText.slice(4, 6)}-${dateText.slice(6, 8)}`,
           type: amount >= 0 ? "income" : "expense",
           name: readText(item[1]),
-          amount
+          amount,
+          excluded: item[3] === 1
         };
       });
 
