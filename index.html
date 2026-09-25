@@ -27,7 +27,9 @@
       --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .75);
       --accent-gradient: linear-gradient(155deg, var(--accent), var(--accent-dark));
       --ease-out: cubic-bezier(.22, .80, .28, 1);
+      --ease-in: cubic-bezier(.4, 0, 1, 1);
       --motion-duration: .32s;
+      --motion-duration-short: .24s;
       --focus-ring: rgba(22, 54, 89, .22);
       --radius: 14px;
       --radius-sm: 10px;
@@ -1271,15 +1273,6 @@
         font-size: 13px;
       }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
   </style>
 </head>
 <body>
@@ -1293,7 +1286,7 @@
             <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
             <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
           </div>
-          <span class="app-version">v2.5</span>
+          <span class="app-version">v2.7</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -1376,8 +1369,9 @@
     const JA_COLLATOR = new Intl.Collator("ja");
     const FOCUSABLE_SELECTOR = "button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])";
     const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-    const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
     const CHECK_IN = [{ opacity: 0, transform: "translateX(-8px)" }, { opacity: 1, transform: "none" }];
+    const FADE_IN = [{ opacity: 0 }, { opacity: 1 }];
+    const ZOOM_IN = [{ opacity: 0, transform: "scale(.94)" }, { opacity: 1, transform: "none" }];
     const TAPPABLE_ROW = ".transaction-row, .fixed-cost-item, .fixed-cost-group-head";
     const FLIP_PARTS = ".transaction-info, .amount, .fixed-cost-head-title, .fixed-cost-subtotal, .fixed-cost-name, .fixed-cost-amount";
 
@@ -1418,6 +1412,7 @@
       previousFocus: null,
       modalOnClose: null,
       modalBack: null,
+      modalClosing: null,
       backdropPointerDown: false,
       toastTimer: null,
       screenVisibilityTimer: null,
@@ -1453,6 +1448,7 @@
       finalBalance: document.getElementById("finalBalance"),
       fixedCostTotalFooter: document.getElementById("fixedCostTotalFooter"),
       modalBackdrop: document.getElementById("modalBackdrop"),
+      modal: document.querySelector(".modal"),
       modalHead: document.querySelector(".modal-head"),
       modalTitle: document.getElementById("modalTitle"),
       modalBody: document.getElementById("modalBody"),
@@ -2072,7 +2068,6 @@
 
       if (fixed) renderFixedCostScreen();
       else renderTransactionList();
-      if (REDUCED_MOTION.matches) return;
 
       const motion = motionOptions();
       animateRows(before, on, motion);
@@ -2083,12 +2078,12 @@
     }
 
     // 時間とカーブは CSS 変数（--motion-duration / --ease-out）から取得する
-    function motionOptions() {
+    function motionOptions(durationVar = "--motion-duration", easingVar = "--ease-out") {
       const rootStyle = getComputedStyle(document.documentElement);
-      const duration = rootStyle.getPropertyValue("--motion-duration").trim();
+      const duration = rootStyle.getPropertyValue(durationVar).trim();
       return {
         duration: duration.endsWith("ms") ? parseFloat(duration) : parseFloat(duration) * 1000,
-        easing: rootStyle.getPropertyValue("--ease-out").trim()
+        easing: rootStyle.getPropertyValue(easingVar).trim()
       };
     }
 
@@ -2747,9 +2742,18 @@
       }
     }
 
+    // 閉じるアニメーション中は閉じた扱い
+    function isModalOpen() {
+      return elements.modalBackdrop.classList.contains("open") && !state.modalClosing;
+    }
+
     function openModal(title, bodyHtml, ariaLabel = "") {
+      const wasOpen = isModalOpen();
+      // 閉じる途中で開き直した場合（確認のキャンセルで前の画面へ戻る等）は画面内の切り替えとして扱う
+      const wasVisible = wasOpen || Boolean(state.modalClosing);
+      stopModalClosing();
       // モーダル内の画面遷移では最初の呼び出し元を保持する
-      if (!elements.modalBackdrop.classList.contains("open")) {
+      if (!wasOpen) {
         state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       }
       runModalOnClose();
@@ -2771,15 +2775,45 @@
       requestAnimationFrame(() => {
         elements.modalBackdrop.focus({ preventScroll: true });
       });
+
+      if (wasVisible) {
+        const motion = motionOptions("--motion-duration-short");
+        [elements.modalHead, elements.modalBody].forEach(element => element.animate(FADE_IN, motion));
+      } else {
+        const motion = motionOptions();
+        elements.modalBackdrop.animate(FADE_IN, motion);
+        elements.modal.animate(ZOOM_IN, motion);
+      }
     }
 
     function closeModal({ restoreFocus = true } = {}) {
-      elements.modalBackdrop.classList.remove("open");
-      elements.modalBody.innerHTML = "";
+      if (!isModalOpen()) return;
       state.modalBack = null;
       runModalOnClose();
       if (restoreFocus && state.previousFocus && document.contains(state.previousFocus)) state.previousFocus.focus();
       state.previousFocus = null;
+
+      // 閉じる間は背後の一覧を操作できるようにする
+      const motion = { ...motionOptions("--motion-duration-short", "--ease-in"), fill: "forwards" };
+      elements.modalBackdrop.style.pointerEvents = "none";
+      state.modalClosing = [
+        elements.modalBackdrop.animate([...FADE_IN].reverse(), motion),
+        elements.modal.animate([...ZOOM_IN].reverse(), motion)
+      ];
+      Promise.all(state.modalClosing.map(animation => animation.finished)).then(finishModalClose, () => {});
+    }
+
+    function finishModalClose() {
+      stopModalClosing();
+      elements.modalBackdrop.classList.remove("open");
+      elements.modalBody.innerHTML = "";
+    }
+
+    function stopModalClosing() {
+      if (!state.modalClosing) return;
+      state.modalClosing.forEach(animation => animation.cancel());
+      state.modalClosing = null;
+      elements.modalBackdrop.style.removeProperty("pointer-events");
     }
 
     // 外側タップ・Esc：重ねて開いた画面ならひとつ前へ戻り、それ以外は閉じる
@@ -2799,7 +2833,7 @@
     }
 
     function handleDocumentKeydown(event) {
-      if (!elements.modalBackdrop.classList.contains("open") || isImeComposing(event)) return;
+      if (!isModalOpen() || isImeComposing(event)) return;
       if (event.key === "Escape") {
         event.preventDefault();
         dismissModal();
