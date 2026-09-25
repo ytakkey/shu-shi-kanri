@@ -40,13 +40,13 @@
       --list-row-height: 44px;
       --list-row-left: 12px;
       --list-row-right: 10px;
-      --fc-btn-w: 46px;
       --data-btn-pad-x: 14px;
       --tx-row-left: calc(var(--list-row-left) - 2px);
       --date-pad-r: 6px;
       /* 数字4桁＋スラッシュ＋右余白が必ず収まる幅（全行共通） */
       --date-col-w: calc(5ch + var(--date-pad-r));
       --excluded-text: rgba(16, 29, 47, .27);
+      --row-pressed: rgba(16, 29, 47, .06);
     }
 
     * { box-sizing: border-box; }
@@ -338,11 +338,48 @@
 
     .transaction-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 8px;
+      grid-template-columns: minmax(0, 1fr);
       align-items: center;
       min-height: var(--list-row-height);
       padding: 0 var(--list-row-right) 0 0;
+    }
+
+    /* 行タップで編集（一括編集中は選択） */
+    .transaction-row,
+    .fixed-cost-item,
+    .fixed-cost-group-head {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* 背景色を上書きせず重ねるため内側の影で押下を表す */
+    .transaction-row:active,
+    .fixed-cost-item:active,
+    .fixed-cost-group-head:active {
+      box-shadow: inset 0 0 0 999px var(--row-pressed);
+    }
+
+    .transaction-row:focus-visible,
+    .fixed-cost-item:focus-visible,
+    .fixed-cost-group-head:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .list-hint {
+      margin: 8px 2px 0;
+      color: var(--muted);
+      opacity: .55;
+      font-size: 11.5px;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    body.bulk-edit .list-hint {
+      display: none;
     }
 
     .transaction-info {
@@ -353,7 +390,7 @@
       gap: 3px;
       align-items: center;
       min-height: var(--list-row-height);
-      padding: 0 4px 0 var(--tx-row-left);
+      padding-left: var(--tx-row-left);
       font-size: var(--list-row-font-size);
       font-weight: 600;
     }
@@ -413,11 +450,13 @@
       color: var(--excluded-text) !important;
     }
 
+    /* 上下の負マージンで行の高さに影響させない（縦中央揃えは保つ） */
     .bulk-check {
       display: none;
       position: relative;
       width: 22px;
       height: 22px;
+      margin-block: -11px;
       padding: 0;
       border: 1.5px solid rgba(16, 29, 47, .28);
       border-radius: 50%;
@@ -438,12 +477,12 @@
       opacity: 0;
     }
 
-    .transaction-row.selected .bulk-check {
+    .selected .bulk-check {
       background: var(--accent);
       border-color: var(--accent);
     }
 
-    .transaction-row.selected .bulk-check::after {
+    .selected .bulk-check::after {
       opacity: 1;
     }
 
@@ -455,38 +494,12 @@
       grid-template-columns: auto minmax(0, 1fr);
       column-gap: 0;
       padding-left: var(--tx-row-left);
-      cursor: pointer;
-      touch-action: manipulation;
     }
 
-    body.bulk-edit .transaction-row .mini-button,
-    body.bulk-edit .transaction-row .mini-danger-button {
-      display: none;
-    }
-
-    .mini-button,
-    .mini-danger-button {
-      border: 1px solid var(--hairline);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12.5px;
-      line-height: 1;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .mini-button {
-      background: rgba(255, 255, 255, .62);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: var(--text);
-    }
-
-    .mini-danger-button {
-      background: rgba(195, 63, 46, .10);
-      border-color: rgba(195, 63, 46, .22);
-      color: var(--expense);
+    body.bulk-edit .fixed-cost-group-head,
+    body.bulk-edit .fixed-cost-item {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      column-gap: var(--list-row-left);
     }
 
     .fixed-cost-list {
@@ -496,7 +509,7 @@
 
     .fixed-cost-group-head {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
       padding: 11px var(--list-row-right) 10px var(--list-row-left);
@@ -531,7 +544,6 @@
     }
 
     .fixed-cost-subtotal {
-      grid-column: 2;
       min-width: 82px;
       text-align: right;
       color: var(--accent-dark);
@@ -541,26 +553,13 @@
       white-space: nowrap;
     }
 
-    .fixed-cost-cat-delete {
-      grid-column: 3 / span 2;
-      width: 100%;
-    }
-
     .fixed-cost-item {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto var(--fc-btn-w) var(--fc-btn-w);
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
       height: var(--list-row-height);
       padding: 0 var(--list-row-right) 0 var(--list-row-left);
-    }
-
-    .fixed-cost-item .mini-button,
-    .fixed-cost-item .mini-danger-button {
-      width: 100%;
-      padding-left: 0;
-      padding-right: 0;
-      text-align: center;
     }
 
     .fixed-cost-name {
@@ -921,14 +920,6 @@
       color: var(--expense);
     }
 
-    .fixed-quick-area {
-      border: 1px solid rgba(195, 63, 46, .18);
-      border-radius: 11px;
-      background: rgba(255, 255, 255, .48);
-      padding: 10px;
-    }
-
-    .hint,
     .confirm-lead,
     .confirm-message,
     .tiny-status {
@@ -996,6 +987,21 @@
       margin-top: 16px;
     }
 
+    .modal-delete-button {
+      display: block;
+      min-width: 140px;
+      min-height: 44px;
+      margin: 12px auto 0;
+      padding: 0 28px;
+      border: 1px solid rgba(195, 63, 46, .24);
+      border-radius: 11px;
+      background: rgba(195, 63, 46, .10);
+      color: var(--expense);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .primary-button,
     .secondary-button,
     .danger-button {
@@ -1014,6 +1020,7 @@
 
 
     .quote-button {
+      display: block;
       width: 100%;
       min-height: 50px;
       border: 1px solid rgba(195, 63, 46, .30);
@@ -1197,25 +1204,14 @@
         font-size: 11.5px;
       }
 
-      .transaction-row {
-        gap: 6px;
-      }
-
       .transaction-info {
         gap: 2px;
-        padding: 0 2px 0 var(--tx-row-left);
       }
 
       .transaction-info::after {
         left: calc(var(--tx-row-left) + var(--date-col-w) + 1px);
         top: 10px;
         bottom: 10px;
-      }
-
-      .mini-button,
-      .mini-danger-button {
-        padding: 8px 9px;
-        font-size: 12px;
       }
 
       .fixed-cost-subtotal,
@@ -1301,7 +1297,7 @@
             <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
             <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
           </div>
-          <span class="app-version">v1.4</span>
+          <span class="app-version">v2.2</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -1315,6 +1311,7 @@
     <div id="screenSlider" class="screen-slider">
       <section id="mainScreen" class="screen" aria-label="収支管理簿">
         <div id="transactionList" class="list"></div>
+        <p id="transactionHint" class="list-hint">行をタップで編集</p>
       </section>
       <section id="fixedCostScreen" class="screen screen-hidden" aria-label="固定費管理簿">
         <div id="fixedCostContent"></div>
@@ -1384,8 +1381,9 @@
     const FOCUSABLE_SELECTOR = "button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])";
     const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
     const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const FADE_IN = [{ opacity: 0 }, { opacity: 1 }];
     const CHECK_IN = [{ opacity: 0, transform: "translateX(-8px)" }, { opacity: 1, transform: "none" }];
+    const TAPPABLE_ROW = ".transaction-row, .fixed-cost-item, .fixed-cost-group-head";
+    const FLIP_PARTS = ".transaction-info, .amount, .fixed-cost-head-title, .fixed-cost-subtotal, .fixed-cost-name, .fixed-cost-amount";
 
     function sampleDate(monthOffset, day) {
       const now = new Date();
@@ -1420,8 +1418,10 @@
       screen: "main",
       bulkEdit: false,
       selectedIds: new Set(),
+      selectedCategories: new Set(),
       previousFocus: null,
       modalOnClose: null,
+      modalBack: null,
       backdropPointerDown: false,
       toastTimer: null,
       screenVisibilityTimer: null,
@@ -1440,6 +1440,7 @@
       mainScreen: document.getElementById("mainScreen"),
       fixedCostScreen: document.getElementById("fixedCostScreen"),
       transactionList: document.getElementById("transactionList"),
+      transactionHint: document.getElementById("transactionHint"),
       fixedCostContent: document.getElementById("fixedCostContent"),
       screenSwitchButton: document.getElementById("screenSwitchButton"),
       bulkEditButton: document.getElementById("bulkEditButton"),
@@ -1471,17 +1472,20 @@
     elements.selectAllButton.addEventListener("click", toggleSelectAll);
     elements.bulkExcludeButton.addEventListener("click", () => setSelectedExcluded(true));
     elements.bulkIncludeButton.addEventListener("click", () => setSelectedExcluded(false));
-    elements.bulkDeleteButton.addEventListener("click", deleteSelectedTransactions);
-    elements.transactionList.addEventListener("click", handleTransactionListClick);
+    elements.bulkDeleteButton.addEventListener("click", deleteSelected);
+    [elements.transactionList, elements.fixedCostContent].forEach(container => {
+      container.addEventListener("click", handleRowClick);
+      container.addEventListener("keydown", handleRowKeydown);
+    });
     elements.currentBalance.addEventListener("click", openBalanceEditor);
     elements.screenSwitchButton.addEventListener("click", toggleScreen);
-    elements.dataButton.addEventListener("click", openDataModal);
+    elements.dataButton.addEventListener("click", () => openDataModal());
     // モーダル内から始めたドラッグを背景上で離しても閉じない
     elements.modalBackdrop.addEventListener("pointerdown", event => {
       state.backdropPointerDown = event.target === elements.modalBackdrop;
     });
     elements.modalBackdrop.addEventListener("click", event => {
-      if (event.target === elements.modalBackdrop && state.backdropPointerDown) closeModal();
+      if (event.target === elements.modalBackdrop && state.backdropPointerDown) dismissModal();
       state.backdropPointerDown = false;
     });
     document.addEventListener("keydown", handleDocumentKeydown);
@@ -1640,6 +1644,7 @@
 
     function renderTransactionList() {
       const transactions = sortedTransactions(data.transactions);
+      elements.transactionHint.hidden = !transactions.length;
       if (!transactions.length) {
         elements.transactionList.className = "empty";
         elements.transactionList.innerHTML = "予定がありません。<br>右下の「予定追加」から登録してください。";
@@ -1652,89 +1657,84 @@
         const amountClass = item.amount >= 0 ? "income" : "expense";
         const selected = bulk && state.selectedIds.has(item.id);
         const rowClass = `row transaction-row${item.excluded ? " excluded" : ""}${selected ? " selected" : ""}`;
-        const label = item.excluded ? `${item.name}（計算から除外）` : item.name;
+        const label = `${formatMonthDay(item.date)} ${item.name} ${formatSignedYen(item.amount)}${item.excluded ? "（計算から除外）" : ""}`;
         return `
-          <div class="${rowClass}" data-id="${escapeHtml(item.id)}">
-            <button class="bulk-check" type="button" aria-label="選択" aria-pressed="${selected}"></button>
-            <div class="transaction-info" aria-label="${escapeHtml(label)}">
+          <div class="${rowClass}" data-id="${escapeHtml(item.id)}" ${rowAttributes(label, selected)}>
+            <span class="bulk-check" aria-hidden="true"></span>
+            <div class="transaction-info">
               <div class="date">${formatMonthDay(item.date)}</div>
               <div class="name">${escapeHtml(item.name)}</div>
               <div class="amount ${amountClass}">${formatSignedYen(item.amount)}</div>
             </div>
-            <button class="mini-button" type="button" data-edit-transaction-id="${escapeHtml(item.id)}">変更</button>
-            <button class="mini-danger-button" type="button" data-delete-transaction-id="${escapeHtml(item.id)}">削除</button>
           </div>
         `;
       }).join("");
       updateBulkSelectionUi();
     }
 
+    function rowAttributes(label, selected) {
+      return `role="button" tabindex="0" aria-label="${escapeHtml(label)}"${state.bulkEdit ? ` aria-pressed="${selected}"` : ""}`;
+    }
+
     function renderFixedCostScreen() {
+      const bulk = state.bulkEdit;
       const groups = fixedCostGroups({ sortCategoriesBySubtotal: true });
-      const listHtml = groups.map(group => `
+      const listHtml = groups.map(group => {
+        const categorySelected = bulk && state.selectedCategories.has(group.category);
+        return `
         <div class="fixed-cost-group">
-          <div class="fixed-cost-group-head">
+          <div class="fixed-cost-group-head${categorySelected ? " selected" : ""}" data-category="${escapeHtml(group.category)}" ${rowAttributes(`カテゴリ ${group.category} ${group.items.length}件 ${formatYen(group.subtotal)}`, categorySelected)}>
+            <span class="bulk-check" aria-hidden="true"></span>
             <div class="fixed-cost-head-title"><span>${escapeHtml(group.category)}</span><small> (${group.items.length}件)</small></div>
             <strong class="fixed-cost-subtotal">${formatYen(group.subtotal)}</strong>
-            <button class="mini-danger-button fixed-cost-cat-delete" type="button" data-delete-fixed-category="${escapeHtml(group.category)}">カテゴリ削除</button>
           </div>
-          ${group.items.length ? group.items.map(item => `
-            <div class="fixed-cost-item">
+          ${group.items.length ? group.items.map(item => {
+            const selected = bulk && state.selectedIds.has(item.id);
+            return `
+            <div class="fixed-cost-item${selected ? " selected" : ""}" data-id="${escapeHtml(item.id)}" ${rowAttributes(`${item.name} ${formatYen(item.amount)}`, selected)}>
+              <span class="bulk-check" aria-hidden="true"></span>
               <div class="fixed-cost-name">${escapeHtml(item.name)}</div>
               <div class="fixed-cost-amount">${formatYen(item.amount)}</div>
-              <button class="mini-button" type="button" data-edit-fixed-cost-id="${escapeHtml(item.id)}">変更</button>
-              <button class="mini-danger-button" type="button" data-delete-fixed-cost-id="${escapeHtml(item.id)}">削除</button>
             </div>
-          `).join("") : '<div class="empty-mini">このカテゴリの固定費明細はありません。</div>'}
+          `;
+          }).join("") : '<div class="empty-mini">このカテゴリの固定費明細はありません。</div>'}
         </div>
-      `).join("");
+      `;
+      }).join("");
 
       elements.fixedCostContent.innerHTML = `
         <div class="fixed-cost-list">
           ${listHtml || '<div class="empty-mini">固定費カテゴリがありません。<br>右下の「固定費追加」から登録してください。</div>'}
         </div>
+        ${listHtml ? '<p class="list-hint">行をタップで編集</p>' : ""}
       `;
+      updateBulkSelectionUi();
     }
 
-    function handleTransactionListClick(event) {
+    function handleRowClick(event) {
+      const row = event.target.closest(TAPPABLE_ROW);
+      if (!row) return;
       if (state.bulkEdit) {
-        const row = event.target.closest(".transaction-row");
-        if (row) toggleSelection(row);
+        toggleSelection(row);
         return;
       }
 
-      const deleteButton = event.target.closest("[data-delete-transaction-id]");
-      if (deleteButton) {
-        deleteTransaction(deleteButton.dataset.deleteTransactionId);
+      if (row.matches(".fixed-cost-group-head")) {
+        openCategoryModal(row.dataset.category);
         return;
       }
-
-      const editButton = event.target.closest("[data-edit-transaction-id]");
-      if (editButton) {
-        const item = data.transactions.find(tx => tx.id === editButton.dataset.editTransactionId);
-        if (item) openTransactionModal({ mode: "edit", item });
-      }
+      const isTransaction = row.matches(".transaction-row");
+      const item = (isTransaction ? data.transactions : data.fixedCosts).find(entry => entry.id === row.dataset.id);
+      if (!item) return;
+      if (isTransaction) openTransactionModal({ mode: "edit", item });
+      else openFixedCostModal({ mode: "edit", item });
     }
 
-    elements.fixedCostContent.addEventListener("click", event => {
-      const editButton = event.target.closest("[data-edit-fixed-cost-id]");
-      if (editButton) {
-        const item = data.fixedCosts.find(cost => cost.id === editButton.dataset.editFixedCostId);
-        if (item) openFixedCostModal({ mode: "edit", item });
-        return;
-      }
-
-      const deleteButton = event.target.closest("[data-delete-fixed-cost-id]");
-      if (deleteButton) {
-        deleteFixedCost(deleteButton.dataset.deleteFixedCostId);
-        return;
-      }
-
-      const categoryButton = event.target.closest("[data-delete-fixed-category]");
-      if (categoryButton) {
-        deleteFixedCategory(categoryButton.dataset.deleteFixedCategory);
-      }
-    });
+    function handleRowKeydown(event) {
+      if ((event.key !== "Enter" && event.key !== " ") || !event.target.matches(TAPPABLE_ROW)) return;
+      event.preventDefault();
+      event.target.click();
+    }
 
     function toggleScreen() {
       state.screen = state.screen === "main" ? "fixed" : "main";
@@ -1755,7 +1755,6 @@
       elements.screenTitle.textContent = fixed ? "固定費管理簿" : "収支管理簿";
       elements.screenSwitchButton.textContent = fixed ? "収支管理簿へ" : "固定費管理簿へ";
       elements.addButton.textContent = fixed ? "固定費追加" : "予定追加";
-      elements.bulkEditButton.hidden = fixed;
 
       state.screenVisibilityTimer = setTimeout(() => {
         inactiveScreen.classList.add("screen-hidden");
@@ -1840,7 +1839,7 @@
         amount: isEdit ? Math.abs(item.amount) : ""
       };
 
-      openModal("", transactionFormHtml(values), isEdit ? "予定の変更" : "予定の追加");
+      openModal("", transactionFormHtml(values, isEdit), isEdit ? "予定の変更" : "予定の追加");
       setupTransactionForm({ mode, item, values });
       setupMoneyInput("transactionAmountInput");
       setupEnterNavigation(["transactionDateInput", "transactionNameInput", "transactionAmountInput"]);
@@ -1858,9 +1857,27 @@
         closeModal();
         renderTransactions();
       });
+
+      if (!isEdit) return;
+      document.getElementById("modalDeleteButton").addEventListener("click", async () => {
+        const draft = readTransactionDraft();
+        const ok = await showConfirm({
+          title: "予定削除",
+          message: `予定「${item.name}」を削除します。\nこの操作は元に戻せません。`,
+          danger: true
+        });
+        if (!ok) {
+          openTransactionModal({ mode, item, draft });
+          return;
+        }
+
+        data.transactions = data.transactions.filter(tx => tx.id !== item.id);
+        saveData();
+        renderTransactions();
+      });
     }
 
-    function transactionFormHtml(values) {
+    function transactionFormHtml(values, isEdit) {
       return `
         <div class="field">
           <label for="transactionDateInput">月日</label>
@@ -1873,9 +1890,8 @@
             <button class="type-option" type="button" data-type-option="expense">支出</button>
           </div>
         </div>
-        <div id="fixedQuickArea" class="fixed-quick-area" hidden>
-          <p class="hint">固定費管理簿のデータから、<br>カテゴリ別または個別の明細を引用できます。</p>
-          <button id="openFixedQuoteButton" class="quote-button" type="button">固定費から引用</button>
+        <div id="fixedQuickArea" hidden>
+          <button id="openFixedQuoteButton" class="quote-button" type="button">固定費管理簿から引用</button>
         </div>
         <div class="field">
           <label for="transactionNameInput">名称</label>
@@ -1885,10 +1901,7 @@
           <label for="transactionAmountInput">金額</label>
           <input id="transactionAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -" enterkeyhint="done">
         </div>
-        <div class="actions">
-          <button class="primary-button" type="button" id="saveButton">保存</button>
-          <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
-        </div>
+        ${modalActionsHtml(isEdit)}
       `;
     }
 
@@ -1922,7 +1935,7 @@
     }
 
     function openFixedQuoteModal(context) {
-      openModal("固定費から引用", fixedQuoteModalHtml());
+      openModal("固定費管理簿から引用", fixedQuoteModalHtml());
 
       elements.modalBody.querySelectorAll("[data-quote-category-index]").forEach(button => {
         button.addEventListener("click", () => {
@@ -1941,9 +1954,8 @@
         });
       });
 
-      document.getElementById("quoteBackButton")?.addEventListener("click", () => {
-        openTransactionModal(context);
-      });
+      state.modalBack = () => openTransactionModal(context);
+      document.getElementById("quoteBackButton").addEventListener("click", state.modalBack);
       document.getElementById("quoteCancelButton")?.addEventListener("click", closeModal);
     }
 
@@ -2035,49 +2047,43 @@
       };
     }
 
-    async function deleteTransaction(id) {
-      const item = data.transactions.find(tx => tx.id === id);
-      if (!item) return;
-
-      const ok = await showConfirm({
-        title: "予定削除",
-        message: `予定「${item.name}」を削除します。\nこの操作は元に戻せません。`,
-        danger: true
-      });
-      if (!ok) return;
-
-      data.transactions = data.transactions.filter(tx => tx.id !== id);
-      saveData();
-      renderTransactions();
-    }
-
     function enterBulkEdit() {
-      if (!data.transactions.length) {
-        showToast("編集する予定がありません。");
+      const fixed = state.screen === "fixed";
+      if (fixed ? !data.fixedCategories.length : !data.transactions.length) {
+        showToast(fixed ? "編集する固定費がありません。" : "編集する予定がありません。");
         return;
       }
       setBulkEdit(true);
     }
 
+    // 固定費画面では「除外」「含める」を出さない
     function setBulkEdit(on) {
+      const fixed = state.screen === "fixed";
       const before = measureRowPositions();
       const normalControls = [elements.screenSwitchButton, elements.bulkEditButton, elements.addButton];
-      const bulkControls = [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton];
+      const bulkControls = fixed
+        ? [elements.bulkDoneButton, elements.bulkDeleteButton]
+        : [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton];
 
       state.bulkEdit = on;
       state.selectedIds.clear();
+      state.selectedCategories.clear();
       document.body.classList.toggle("bulk-edit", on);
       normalControls.forEach(button => { button.hidden = on; });
-      bulkControls.forEach(button => { button.hidden = !on; });
+      [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton]
+        .forEach(button => { button.hidden = !on || !bulkControls.includes(button); });
       elements.currentBalance.disabled = on;
 
-      renderTransactionList();
+      if (fixed) renderFixedCostScreen();
+      else renderTransactionList();
       if (REDUCED_MOTION.matches) return;
 
       const motion = motionOptions();
       animateRows(before, on, motion);
-      (on ? [elements.bulkSelect, ...bulkControls] : [elements.dataButton, ...normalControls])
-        .forEach(element => element.animate(FADE_IN, motion));
+      const appearing = on ? [elements.bulkSelect, ...bulkControls] : [elements.dataButton, ...normalControls];
+      // 無効状態のボタンは薄いまま現れるよう、到達点を現在の不透明度にする
+      const opacities = appearing.map(element => getComputedStyle(element).opacity);
+      appearing.forEach((element, index) => element.animate([{ opacity: 0 }, { opacity: opacities[index] }], motion));
     }
 
     // 時間とカーブは CSS 変数（--motion-duration / --ease-out）から取得する
@@ -2090,13 +2096,19 @@
       };
     }
 
+    function activeRows() {
+      const container = state.screen === "fixed" ? elements.fixedCostContent : elements.transactionList;
+      return [...container.querySelectorAll(TAPPABLE_ROW)];
+    }
+
+    function rowKey(row) {
+      return row.dataset.category === undefined ? row.dataset.id : `category:${row.dataset.category}`;
+    }
+
     function measureRowPositions() {
       const positions = new Map();
-      elements.transactionList.querySelectorAll(".transaction-row").forEach(row => {
-        positions.set(row.dataset.id, {
-          info: row.querySelector(".transaction-info").getBoundingClientRect().left,
-          amount: row.querySelector(".amount").getBoundingClientRect().left
-        });
+      activeRows().forEach(row => {
+        positions.set(rowKey(row), [...row.querySelectorAll(FLIP_PARTS)].map(part => part.getBoundingClientRect().left));
       });
       return positions;
     }
@@ -2104,22 +2116,20 @@
     // 行の中身を切替前の位置から移動させる（計測をまとめてから書き込む）
     function animateRows(before, entering, motion) {
       const moves = [];
-      elements.transactionList.querySelectorAll(".transaction-row").forEach(row => {
-        const prev = before.get(row.dataset.id);
+      activeRows().forEach(row => {
+        const prev = before.get(rowKey(row));
         if (!prev) return;
-        const info = row.querySelector(".transaction-info");
-        const amount = row.querySelector(".amount");
-        const infoDx = prev.info - info.getBoundingClientRect().left;
-        // 金額は行の中身の子要素なので、中身の移動分を差し引く
-        const amountDx = prev.amount - amount.getBoundingClientRect().left - infoDx;
-        moves.push({ row, info, amount, infoDx, amountDx });
+        const parts = [...row.querySelectorAll(FLIP_PARTS)];
+        moves.push({ row, parts, dx: parts.map((part, index) => prev[index] - part.getBoundingClientRect().left) });
       });
 
-      moves.forEach(({ row, info, amount, infoDx, amountDx }) => {
-        slideFrom(info, infoDx, motion);
-        slideFrom(amount, amountDx, motion);
+      moves.forEach(({ row, parts, dx }) => {
+        parts.forEach((part, index) => {
+          // 入れ子の要素は親の移動分を差し引く
+          const parentIndex = parts.indexOf(part.parentElement.closest(FLIP_PARTS));
+          slideFrom(part, parentIndex < 0 ? dx[index] : dx[index] - dx[parentIndex], motion);
+        });
         if (entering) row.querySelector(".bulk-check").animate(CHECK_IN, motion);
-        else row.querySelectorAll(".mini-button, .mini-danger-button").forEach(button => button.animate(FADE_IN, motion));
       });
     }
 
@@ -2127,26 +2137,72 @@
       if (dx) element.animate([{ transform: `translateX(${dx}px)` }, { transform: "none" }], motion);
     }
 
+    // カテゴリ行の選択は配下の明細すべての選択と連動する
     function toggleSelection(row) {
-      const id = row.dataset.id;
-      const selected = !state.selectedIds.has(id);
-      if (selected) state.selectedIds.add(id);
-      else state.selectedIds.delete(id);
-      row.classList.toggle("selected", selected);
-      row.querySelector(".bulk-check").setAttribute("aria-pressed", String(selected));
+      if (row.matches(".fixed-cost-group-head")) {
+        const category = row.dataset.category;
+        const select = !state.selectedCategories.has(category);
+        if (select) state.selectedCategories.add(category);
+        else state.selectedCategories.delete(category);
+        data.fixedCosts.forEach(cost => {
+          if (cost.category !== category) return;
+          if (select) state.selectedIds.add(cost.id);
+          else state.selectedIds.delete(cost.id);
+        });
+      } else {
+        const id = row.dataset.id;
+        if (state.selectedIds.has(id)) state.selectedIds.delete(id);
+        else state.selectedIds.add(id);
+        if (row.matches(".fixed-cost-item")) syncCategorySelection(data.fixedCosts.find(cost => cost.id === id).category);
+      }
+      syncSelectionUi();
+    }
+
+    // 空のカテゴリはカテゴリ行のタップでのみ選択する
+    function syncCategorySelection(category) {
+      const items = data.fixedCosts.filter(cost => cost.category === category);
+      if (items.length && items.every(cost => state.selectedIds.has(cost.id))) state.selectedCategories.add(category);
+      else state.selectedCategories.delete(category);
+    }
+
+    function isRowSelected(row) {
+      return row.dataset.category === undefined
+        ? state.selectedIds.has(row.dataset.id)
+        : state.selectedCategories.has(row.dataset.category);
+    }
+
+    function syncSelectionUi() {
+      activeRows().forEach(row => {
+        const selected = isRowSelected(row);
+        row.classList.toggle("selected", selected);
+        row.setAttribute("aria-pressed", String(selected));
+      });
       updateBulkSelectionUi();
     }
 
+    function isAllSelected() {
+      if (state.screen === "fixed") {
+        return state.selectedCategories.size === data.fixedCategories.length
+          && state.selectedIds.size === data.fixedCosts.length;
+      }
+      return state.selectedIds.size > 0 && state.selectedIds.size === data.transactions.length;
+    }
+
     function toggleSelectAll() {
-      const selectAll = state.selectedIds.size < data.transactions.length;
-      state.selectedIds = new Set(selectAll ? data.transactions.map(tx => tx.id) : []);
-      renderTransactionList();
+      const select = !isAllSelected();
+      if (state.screen === "fixed") {
+        state.selectedIds = new Set(select ? data.fixedCosts.map(cost => cost.id) : []);
+        state.selectedCategories = new Set(select ? data.fixedCategories : []);
+      } else {
+        state.selectedIds = new Set(select ? data.transactions.map(tx => tx.id) : []);
+      }
+      syncSelectionUi();
     }
 
     function updateBulkSelectionUi() {
       if (!state.bulkEdit) return;
-      const count = state.selectedIds.size;
-      const allSelected = count > 0 && count === data.transactions.length;
+      const count = state.selectedIds.size + state.selectedCategories.size;
+      const allSelected = count > 0 && isAllSelected();
       elements.bulkCount.textContent = `${count}件選択中`;
       elements.selectAllButton.textContent = allSelected ? "選択解除" : "すべて選択";
       elements.selectAllButton.setAttribute("aria-pressed", String(allSelected));
@@ -2160,6 +2216,34 @@
       });
       saveData();
       renderTransactions();
+    }
+
+    function deleteSelected() {
+      if (state.screen === "fixed") deleteSelectedFixedCosts();
+      else deleteSelectedTransactions();
+    }
+
+    async function deleteSelectedFixedCosts() {
+      const categoryCount = state.selectedCategories.size;
+      const isTarget = cost => state.selectedIds.has(cost.id) || state.selectedCategories.has(cost.category);
+      const itemCount = data.fixedCosts.filter(isTarget).length;
+      if (!categoryCount && !itemCount) return;
+
+      const targets = [categoryCount && `カテゴリ ${categoryCount}件`, itemCount && `固定費明細 ${itemCount}件`].filter(Boolean);
+      const ok = await showConfirm({
+        title: "固定費削除",
+        message: `選択した${targets.join("と")}を削除します。\nこの操作は元に戻せません。`,
+        danger: true
+      });
+      if (!ok) return;
+
+      data.fixedCosts = data.fixedCosts.filter(cost => !isTarget(cost));
+      data.fixedCategories = data.fixedCategories.filter(category => !state.selectedCategories.has(category));
+      saveData();
+      state.selectedIds.clear();
+      state.selectedCategories.clear();
+      renderFixedCosts();
+      if (!data.fixedCategories.length) setBulkEdit(false);
     }
 
     async function deleteSelectedTransactions() {
@@ -2213,15 +2297,15 @@
       });
     }
 
-    function openFixedCostModal({ mode, item = null }) {
+    function openFixedCostModal({ mode, item = null, draft = null }) {
       const isEdit = mode === "edit";
-      const values = {
+      const values = draft || {
         category: isEdit ? item.category : "",
         name: isEdit ? item.name : "",
         amount: isEdit ? item.amount : ""
       };
 
-      openModal("", fixedCostFormHtml(values), isEdit ? "固定費の変更" : "固定費の追加");
+      openModal("", fixedCostFormHtml(values, isEdit), isEdit ? "固定費の変更" : "固定費の追加");
       setupFixedCostForm();
       setupMoneyInput("fixedAmountInput");
       setupEnterNavigation(["fixedCategoryInput", "fixedNameInput", "fixedAmountInput"]);
@@ -2240,9 +2324,31 @@
         closeModal();
         renderFixedCosts();
       });
+
+      if (!isEdit) return;
+      document.getElementById("modalDeleteButton").addEventListener("click", async () => {
+        const draft = {
+          category: document.getElementById("fixedCategoryInput").value,
+          name: document.getElementById("fixedNameInput").value,
+          amount: parseYenInput(document.getElementById("fixedAmountInput").value) || ""
+        };
+        const ok = await showConfirm({
+          title: "固定費明細削除",
+          message: `固定費明細「${item.name}」を削除します。\nカテゴリ「${item.category}」は残ります。`,
+          danger: true
+        });
+        if (!ok) {
+          openFixedCostModal({ mode, item, draft });
+          return;
+        }
+
+        data.fixedCosts = data.fixedCosts.filter(cost => cost.id !== item.id);
+        saveData();
+        renderFixedCosts();
+      });
     }
 
-    function fixedCostFormHtml(values) {
+    function fixedCostFormHtml(values, isEdit) {
       const categoryChips = sortedFixedCategories().map(category => `
         <button class="category-chip" type="button" data-fill-fixed-category="${escapeHtml(category)}">${escapeHtml(category)}</button>
       `).join("");
@@ -2266,11 +2372,81 @@
           <label for="fixedAmountInput">金額</label>
           <input id="fixedAmountInput" type="text" inputmode="numeric" value="${escapeHtml(formatYenInput(values.amount))}" placeholder="¥ -" enterkeyhint="done">
         </div>
+        ${modalActionsHtml(isEdit)}
+      `;
+    }
+
+    function modalActionsHtml(withDelete) {
+      return `
         <div class="actions">
           <button class="primary-button" type="button" id="saveButton">保存</button>
           <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
         </div>
+        ${withDelete ? '<button id="modalDeleteButton" class="modal-delete-button" type="button">削除</button>' : ""}
       `;
+    }
+
+    function openCategoryModal(category, draftName = category) {
+      const count = data.fixedCosts.filter(cost => cost.category === category).length;
+      openModal("", `
+        <div class="field">
+          <label for="categoryNameInput">カテゴリ名</label>
+          <input id="categoryNameInput" type="text" value="${escapeHtml(draftName)}" enterkeyhint="done">
+        </div>
+        ${modalActionsHtml(true)}
+      `, "カテゴリの編集");
+      setupEnterNavigation(["categoryNameInput"]);
+      setupSelectAllOnFocus(["categoryNameInput"]);
+      const input = document.getElementById("categoryNameInput");
+
+      document.getElementById("cancelButton").addEventListener("click", closeModal);
+      document.getElementById("saveButton").addEventListener("click", async () => {
+        const name = input.value.trim();
+        if (!name || name === category) {
+          closeModal();
+          return;
+        }
+
+        if (data.fixedCategories.includes(name)) {
+          const ok = await showConfirm({
+            title: "カテゴリ統合",
+            message: `「${name}」に統合しますか？\n「${category}」の固定費明細 ${count}件を「${name}」に移します。`,
+            confirmText: "統合"
+          });
+          if (!ok) {
+            openCategoryModal(category, name);
+            return;
+          }
+          data.fixedCategories = data.fixedCategories.filter(item => item !== category);
+        } else {
+          data.fixedCategories = data.fixedCategories.map(item => item === category ? name : item);
+        }
+        data.fixedCosts.forEach(cost => {
+          if (cost.category === category) cost.category = name;
+        });
+
+        saveData();
+        closeModal();
+        renderFixedCosts();
+      });
+
+      document.getElementById("modalDeleteButton").addEventListener("click", async () => {
+        const typed = input.value;
+        const ok = await showConfirm({
+          title: "カテゴリ削除",
+          message: `カテゴリ「${category}」を削除します。\n配下の固定費明細 ${count}件も削除されます。`,
+          danger: true
+        });
+        if (!ok) {
+          openCategoryModal(category, typed);
+          return;
+        }
+
+        data.fixedCategories = data.fixedCategories.filter(item => item !== category);
+        data.fixedCosts = data.fixedCosts.filter(cost => cost.category !== category);
+        saveData();
+        renderFixedCosts();
+      });
     }
 
     function setupFixedCostForm() {
@@ -2301,43 +2477,11 @@
       return { category, name, amount };
     }
 
-    async function deleteFixedCost(id) {
-      const item = data.fixedCosts.find(cost => cost.id === id);
-      if (!item) return;
-
-      const ok = await showConfirm({
-        title: "固定費明細削除",
-        message: `固定費明細「${item.name}」を削除します。\nカテゴリ「${item.category}」は残ります。`,
-        danger: true
-      });
-      if (!ok) return;
-
-      data.fixedCosts = data.fixedCosts.filter(cost => cost.id !== id);
-      saveData();
-      renderFixedCosts();
-    }
-
-    async function deleteFixedCategory(category) {
-      const count = data.fixedCosts.filter(cost => cost.category === category).length;
-      const ok = await showConfirm({
-        title: "カテゴリ削除",
-        message: `カテゴリ「${category}」を削除します。\n配下の固定費明細 ${count}件も削除されます。`,
-        confirmText: "削除",
-        danger: true
-      });
-      if (!ok) return;
-
-      data.fixedCategories = data.fixedCategories.filter(item => item !== category);
-      data.fixedCosts = data.fixedCosts.filter(cost => cost.category !== category);
-      saveData();
-      renderFixedCosts();
-    }
-
     function ensureFixedCategory(category) {
       if (!data.fixedCategories.includes(category)) data.fixedCategories.push(category);
     }
 
-    function openDataModal() {
+    function openDataModal(importDraft = "") {
       openModal("データバックアップ・復元", `
         <div class="section-title">バックアップ</div>
         <div class="actions">
@@ -2352,7 +2496,7 @@
         <div class="section-title">復元</div>
         <div class="field">
           <label for="importText">バックアップコード</label>
-          <textarea id="importText" placeholder="ここにバックアップコードを貼り付け"></textarea>
+          <textarea id="importText" placeholder="ここにバックアップコードを貼り付け">${escapeHtml(importDraft)}</textarea>
         </div>
         <div class="actions">
           <button class="secondary-button" type="button" id="pasteBackupButton">貼り付け</button>
@@ -2421,7 +2565,8 @@
       });
 
       document.getElementById("importButton").addEventListener("click", async () => {
-        const raw = document.getElementById("importText").value.trim();
+        const typed = document.getElementById("importText").value;
+        const raw = typed.trim();
         if (!raw) {
           showToast("バックアップコードを貼り付けてください。");
           return;
@@ -2444,7 +2589,10 @@
           danger: false,
           confirmText: "読み込む"
         });
-        if (!ok) return;
+        if (!ok) {
+          openDataModal(typed);
+          return;
+        }
 
         data = imported;
         saveData();
@@ -2609,6 +2757,7 @@
         state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       }
       runModalOnClose();
+      state.modalBack = null;
       elements.modalTitle.textContent = title || "";
       elements.modalHead.hidden = !title;
 
@@ -2631,9 +2780,16 @@
     function closeModal({ restoreFocus = true } = {}) {
       elements.modalBackdrop.classList.remove("open");
       elements.modalBody.innerHTML = "";
+      state.modalBack = null;
       runModalOnClose();
       if (restoreFocus && state.previousFocus && document.contains(state.previousFocus)) state.previousFocus.focus();
       state.previousFocus = null;
+    }
+
+    // 外側タップ・Esc：重ねて開いた画面ならひとつ前へ戻り、それ以外は閉じる
+    function dismissModal() {
+      if (state.modalBack) state.modalBack();
+      else closeModal();
     }
 
     function runModalOnClose() {
@@ -2650,7 +2806,7 @@
       if (!elements.modalBackdrop.classList.contains("open") || isImeComposing(event)) return;
       if (event.key === "Escape") {
         event.preventDefault();
-        closeModal();
+        dismissModal();
         return;
       }
       if (event.key === "Tab") trapModalFocus(event);
@@ -2832,7 +2988,7 @@
       let lastTouchEnd = 0;
       document.addEventListener("touchend", event => {
         // 一括編集の行選択は連続タップを妨げない（拡大は touch-action で防ぐ）
-        if (state.bulkEdit && event.target.closest(".transaction-row, #selectAllButton")) return;
+        if (state.bulkEdit && event.target.closest(`${TAPPABLE_ROW}, #selectAllButton`)) return;
         const now = Date.now();
         if (now - lastTouchEnd <= 300) {
           event.preventDefault();
