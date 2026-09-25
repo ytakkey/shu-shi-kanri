@@ -22,6 +22,9 @@
       --hairline-strong: rgba(16, 29, 47, .16);
       --glass-blur: blur(26px) saturate(180%);
       --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .75);
+      --accent-gradient: linear-gradient(155deg, var(--accent), var(--accent-dark));
+      --ease-out: cubic-bezier(.22, .80, .28, 1);
+      --motion-duration: .32s;
       --focus-ring: rgba(22, 54, 89, .22);
       --radius: 14px;
       --radius-sm: 10px;
@@ -43,7 +46,7 @@
       --date-pad-r: 6px;
       /* 数字4桁＋スラッシュ＋右余白が必ず収まる幅（全行共通） */
       --date-col-w: calc(5ch + var(--date-pad-r));
-      --excluded-text: rgba(16, 29, 47, .3);
+      --excluded-text: rgba(16, 29, 47, .27);
     }
 
     * { box-sizing: border-box; }
@@ -86,7 +89,7 @@
 
     button {
       -webkit-tap-highlight-color: transparent;
-      transition: transform .15s cubic-bezier(.22, .80, .28, 1);
+      transition: transform .15s var(--ease-out);
     }
 
     button:active {
@@ -172,6 +175,11 @@
 
     .bulk-select .data-button {
       min-width: calc(5em + var(--data-btn-pad-x) * 2 + 2px);
+      color: #fff;
+      background: var(--accent-gradient);
+      border-color: rgba(255, 255, 255, .30);
+      box-shadow: none;
+      font-weight: 700;
       touch-action: manipulation;
     }
 
@@ -272,7 +280,7 @@
       width: 200%;
       height: 100%;
       transform: translateX(0);
-      transition: transform .32s cubic-bezier(.22, .80, .28, 1);
+      transition: transform var(--motion-duration) var(--ease-out);
       will-change: transform;
     }
 
@@ -663,7 +671,7 @@
     .floating-add {
       flex: 0 0 auto;
       color: #fff;
-      background: linear-gradient(155deg, var(--accent), var(--accent-dark));
+      background: var(--accent-gradient);
       border-color: rgba(255, 255, 255, .30);
     }
 
@@ -1000,7 +1008,7 @@
       cursor: pointer;
     }
 
-    .primary-button { background: linear-gradient(155deg, var(--accent), var(--accent-dark)); border-color: rgba(10, 31, 54, .50); color: #fff; box-shadow: 0 14px 26px -14px rgba(10, 22, 39, .50); }
+    .primary-button { background: var(--accent-gradient); border-color: rgba(10, 31, 54, .50); color: #fff; box-shadow: 0 14px 26px -14px rgba(10, 22, 39, .50); }
     .secondary-button { background: rgba(255, 255, 255, .68); color: var(--text); }
     .danger-button { background: rgba(195, 63, 46, .10); border-color: rgba(195, 63, 46, .24); color: var(--expense); }
 
@@ -1293,7 +1301,7 @@
             <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
             <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
           </div>
-          <span class="app-version">v1.2</span>
+          <span class="app-version">v1.4</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -1375,6 +1383,9 @@
     const JA_COLLATOR = new Intl.Collator("ja");
     const FOCUSABLE_SELECTOR = "button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])";
     const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+    const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const FADE_IN = [{ opacity: 0 }, { opacity: 1 }];
+    const CHECK_IN = [{ opacity: 0, transform: "translateX(-8px)" }, { opacity: 1, transform: "none" }];
 
     function sampleDate(monthOffset, day) {
       const now = new Date();
@@ -1435,6 +1446,7 @@
       bulkDoneButton: document.getElementById("bulkDoneButton"),
       bulkCount: document.getElementById("bulkCount"),
       selectAllButton: document.getElementById("selectAllButton"),
+      bulkSelect: document.querySelector(".bulk-select"),
       bulkExcludeButton: document.getElementById("bulkExcludeButton"),
       bulkIncludeButton: document.getElementById("bulkIncludeButton"),
       bulkDeleteButton: document.getElementById("bulkDeleteButton"),
@@ -2048,17 +2060,71 @@
     }
 
     function setBulkEdit(on) {
+      const before = measureRowPositions();
+      const normalControls = [elements.screenSwitchButton, elements.bulkEditButton, elements.addButton];
+      const bulkControls = [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton];
+
       state.bulkEdit = on;
       state.selectedIds.clear();
       document.body.classList.toggle("bulk-edit", on);
-
-      [elements.screenSwitchButton, elements.bulkEditButton, elements.addButton]
-        .forEach(button => { button.hidden = on; });
-      [elements.bulkDoneButton, elements.bulkExcludeButton, elements.bulkIncludeButton, elements.bulkDeleteButton]
-        .forEach(button => { button.hidden = !on; });
+      normalControls.forEach(button => { button.hidden = on; });
+      bulkControls.forEach(button => { button.hidden = !on; });
       elements.currentBalance.disabled = on;
 
       renderTransactionList();
+      if (REDUCED_MOTION.matches) return;
+
+      const motion = motionOptions();
+      animateRows(before, on, motion);
+      (on ? [elements.bulkSelect, ...bulkControls] : [elements.dataButton, ...normalControls])
+        .forEach(element => element.animate(FADE_IN, motion));
+    }
+
+    // 時間とカーブは CSS 変数（--motion-duration / --ease-out）から取得する
+    function motionOptions() {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const duration = rootStyle.getPropertyValue("--motion-duration").trim();
+      return {
+        duration: duration.endsWith("ms") ? parseFloat(duration) : parseFloat(duration) * 1000,
+        easing: rootStyle.getPropertyValue("--ease-out").trim()
+      };
+    }
+
+    function measureRowPositions() {
+      const positions = new Map();
+      elements.transactionList.querySelectorAll(".transaction-row").forEach(row => {
+        positions.set(row.dataset.id, {
+          info: row.querySelector(".transaction-info").getBoundingClientRect().left,
+          amount: row.querySelector(".amount").getBoundingClientRect().left
+        });
+      });
+      return positions;
+    }
+
+    // 行の中身を切替前の位置から移動させる（計測をまとめてから書き込む）
+    function animateRows(before, entering, motion) {
+      const moves = [];
+      elements.transactionList.querySelectorAll(".transaction-row").forEach(row => {
+        const prev = before.get(row.dataset.id);
+        if (!prev) return;
+        const info = row.querySelector(".transaction-info");
+        const amount = row.querySelector(".amount");
+        const infoDx = prev.info - info.getBoundingClientRect().left;
+        // 金額は行の中身の子要素なので、中身の移動分を差し引く
+        const amountDx = prev.amount - amount.getBoundingClientRect().left - infoDx;
+        moves.push({ row, info, amount, infoDx, amountDx });
+      });
+
+      moves.forEach(({ row, info, amount, infoDx, amountDx }) => {
+        slideFrom(info, infoDx, motion);
+        slideFrom(amount, amountDx, motion);
+        if (entering) row.querySelector(".bulk-check").animate(CHECK_IN, motion);
+        else row.querySelectorAll(".mini-button, .mini-danger-button").forEach(button => button.animate(FADE_IN, motion));
+      });
+    }
+
+    function slideFrom(element, dx, motion) {
+      if (dx) element.animate([{ transform: `translateX(${dx}px)` }, { transform: "none" }], motion);
     }
 
     function toggleSelection(row) {
@@ -2092,7 +2158,6 @@
       data.transactions.forEach(item => {
         if (state.selectedIds.has(item.id)) item.excluded = excluded;
       });
-      state.selectedIds.clear();
       saveData();
       renderTransactions();
     }
