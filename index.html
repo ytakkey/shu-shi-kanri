@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>収支管理簿</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <style>
     html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     :root {
@@ -28,6 +31,7 @@
       --focus-ring: rgba(22, 54, 89, .22);
       --radius: 14px;
       --radius-sm: 10px;
+      --actions-gap: 10px;
       --inner-width: min(720px, calc(100vw - 36px));
       --header-h: 164px;
       --footer-h: 132px;
@@ -983,23 +987,15 @@
 
     .actions {
       display: flex;
-      gap: 10px;
+      gap: var(--actions-gap);
       margin-top: 16px;
     }
 
+    /* 見た目は .danger-button、幅は保存・キャンセル1つ分 */
     .modal-delete-button {
       display: block;
-      min-width: 140px;
-      min-height: 44px;
+      width: calc((100% - var(--actions-gap)) / 2);
       margin: 12px auto 0;
-      padding: 0 28px;
-      border: 1px solid rgba(195, 63, 46, .24);
-      border-radius: 11px;
-      background: rgba(195, 63, 46, .10);
-      color: var(--expense);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
     }
 
     .primary-button,
@@ -1297,7 +1293,7 @@
             <span id="bulkCount" class="bulk-count" aria-live="polite"></span>
             <button id="selectAllButton" class="data-button" type="button" aria-pressed="false">すべて選択</button>
           </div>
-          <span class="app-version">v2.2</span>
+          <span class="app-version">v2.5</span>
         </div>
       </div>
       <div id="balanceArea" class="balance-area">
@@ -2382,7 +2378,7 @@
           <button class="primary-button" type="button" id="saveButton">保存</button>
           <button class="secondary-button" type="button" id="cancelButton">キャンセル</button>
         </div>
-        ${withDelete ? '<button id="modalDeleteButton" class="modal-delete-button" type="button">削除</button>' : ""}
+        ${withDelete ? '<button id="modalDeleteButton" class="danger-button modal-delete-button" type="button">削除</button>' : ""}
       `;
     }
 
